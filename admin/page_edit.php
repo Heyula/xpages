@@ -157,6 +157,63 @@ $extraFields    = $pageId ? $fieldHandler->getFieldsForPage($pageId, false) : $f
 
 $allPages = $pageHandler->getObjects() ?: array();
 $blockedParentIds = array_flip($descendantIds);
+
+// ── XOOPS Editörü - DÜZELTİLDİ ─────────────────────────────────────────────
+$bodyContent = (string)$page->getVar('body', 'n');
+$editorHtml = '';
+
+// XOOPS editör sistemini kullan
+if (file_exists(XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php')) {
+    require_once XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php';
+    
+    if (class_exists('XoopsEditorHandler')) {
+        $editorHandler = XoopsEditorHandler::getInstance();
+        
+        // Mevcut editörleri kontrol et
+        $editors = $editorHandler->getList();
+        
+        // Tercih edilen editör (tinyMCE, ckeditor, dhtml, textarea)
+        $preferredEditor = 'tinymce';
+        
+        if (isset($editors[$preferredEditor])) {
+            $editor = $editorHandler->get($preferredEditor, [
+                'name' => 'body',
+                'value' => $bodyContent,
+                'rows' => 25,
+                'cols' => '100%',
+                'width' => '100%',
+                'height' => '400px'
+            ]);
+            if ($editor && method_exists($editor, 'render')) {
+                $editorHtml = $editor->render();
+            }
+        }
+        
+        // TinyMCE yoksa dhtml editörü dene
+        if (empty($editorHtml) && isset($editors['dhtml'])) {
+            $editor = $editorHandler->get('dhtml', [
+                'name' => 'body',
+                'value' => $bodyContent,
+                'rows' => 25,
+                'cols' => '100%'
+            ]);
+            if ($editor && method_exists($editor, 'render')) {
+                $editorHtml = $editor->render();
+            }
+        }
+        
+        // Hiçbir editör yoksa textarea kullan
+        if (empty($editorHtml)) {
+            $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
+        }
+    } else {
+        // XoopsEditorHandler sınıfı yoksa textarea kullan
+        $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
+    }
+} else {
+    // xoopseditor.php dosyası yoksa textarea kullan
+    $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
+}
 ?>
 
 <h3><?= $pageId ? _AM_XPAGES_EDIT_PAGE : _AM_XPAGES_ADD_PAGE ?></h3>
@@ -213,7 +270,7 @@ $blockedParentIds = array_flip($descendantIds);
     </div>
     <div class="xpages-field">
         <label><?= _AM_XPAGES_BODY ?></label>
-        <textarea name="body" rows="16"><?= htmlspecialchars((string)$page->getVar('body', 'n'), ENT_QUOTES) ?></textarea>
+        <?= $editorHtml ?>
     </div>
     <div class="xp-row">
         <div class="xpages-field">
@@ -345,6 +402,19 @@ function xpShowTab(el, id) {
     document.getElementById(id).classList.add('active');
     el.parentElement.classList.add('active');
 }
+
+// TinyMCE için kaydetme işlemi
+document.getElementById('xpages-edit-form').addEventListener('submit', function() {
+    if (typeof tinyMCE !== 'undefined') {
+        tinyMCE.triggerSave();
+    }
+    // CKEditor için
+    if (typeof CKEDITOR !== 'undefined') {
+        for (var instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+});
 </script>
 
 <?php
