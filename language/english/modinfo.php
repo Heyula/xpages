@@ -29,3 +29,9 @@ define('_MI_XPAGES_SHOW_LASTMOD',          'Show last modified date');
 define('_MI_XPAGES_SHOW_LASTMOD_DESC',     'Show when the page was last edited.');
 // İlave alanlar için başlık
 define('_MD_XPAGES_EXTRA_FIELDS', 'Ek Bilgiler');
+// Menu
+define('_AM_XPAGES_MENU_MAIN',     'Home');
+define('_AM_XPAGES_MENU_PAGES',    'Pages');
+define('_AM_XPAGES_MENU_ADD_PAGE', 'Add Page');
+define('_AM_XPAGES_MENU_FIELDS',   'Extra Fields');
+define('_AM_XPAGES_MENU_ABOUT',    'About');
