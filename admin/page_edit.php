@@ -27,8 +27,18 @@ if (!$pageHandler || !$fieldHandler || !$valueHandler) {
 
 $pageId = isset($_GET['page_id'])  ? (int)$_GET['page_id']  :
          (isset($_POST['page_id']) ? (int)$_POST['page_id'] : 0);
-$op     = $_POST['op'] ?? 'edit';
-$canUseAdvancedCode = is_object($xoopsUser) && method_exists($xoopsUser, 'getGroups') && in_array(1, $xoopsUser->getGroups(), true);
+$op     = isset($_POST['op']) ? $_POST['op'] : (isset($_GET['op']) ? $_GET['op'] : 'edit');
+
+// Admin yetki kontrolü - DÜZELTİLDİ
+$canUseAdvancedCode = false;
+if (isset($GLOBALS['xoopsUser']) && is_object($GLOBALS['xoopsUser'])) {
+    $userGroups = $GLOBALS['xoopsUser']->getGroups();
+    // Admin grubu ID 1 veya webmaster yetkisi
+    if (in_array(1, $userGroups, true) || $GLOBALS['xoopsUser']->isAdmin()) {
+        $canUseAdvancedCode = true;
+    }
+}
+
 $descendantIds = [];
 if ($pageId) {
     xpages_collect_descendant_ids($pageHandler, $pageId, $descendantIds);
@@ -37,111 +47,105 @@ if ($pageId) {
 // ── Kaydet ────────────────────────────────────────────────────────────────────
 if ($op === 'save') {
     if (!$GLOBALS['xoopsSecurity']->check()) {
-        redirect_header('pages.php', 3, implode('<br>', $GLOBALS['xoopsSecurity']->getErrors()));
-        exit;
-    }
-
-    if (!is_object($GLOBALS['xoopsUser'])) {
-        redirect_header('pages.php', 3, _AM_XPAGES_SAVE_ERROR);
-        exit;
-    }
-
-    $page = $pageId ? $pageHandler->get($pageId) : $pageHandler->create();
-    if (!$page) {
-        redirect_header('pages.php', 3, _AM_XPAGES_PAGE_NOT_FOUND);
-        exit;
-    }
-
-    $parentId = (int)($_POST['parent_id'] ?? 0);
-    if ($pageId && $parentId > 0 && ($parentId === $pageId || in_array($parentId, $descendantIds, true))) {
-        redirect_header('page_edit.php?page_id=' . $pageId, 3, _AM_XPAGES_PARENT_INVALID);
-        exit;
-    }
-
-    $page->setVar('title',        $_POST['title']        ?? '');
-    $page->setVar('body',         $_POST['body']         ?? '');
-    $page->setVar('short_desc',   $_POST['short_desc']   ?? '');
-    $page->setVar('page_status',  (int)($_POST['page_status']  ?? 1));
-    $page->setVar('menu_order',   (int)($_POST['menu_order']   ?? 0));
-    $page->setVar('show_in_menu', (int)($_POST['show_in_menu'] ?? 0));
-    $page->setVar('show_in_nav',  (int)($_POST['show_in_nav']  ?? 0));
-    $page->setVar('parent_id',    $parentId);
-    $page->setVar('meta_title',    $_POST['meta_title']    ?? '');
-    $page->setVar('meta_keywords', $_POST['meta_keywords'] ?? '');
-    $page->setVar('meta_desc',     $_POST['meta_desc']     ?? '');
-    $page->setVar('noindex',      isset($_POST['noindex'])  ? 1 : 0);
-    $page->setVar('nofollow',     isset($_POST['nofollow']) ? 1 : 0);
-    $page->setVar('redirect_url', xpages_normalize_url($_POST['redirect_url'] ?? ''));
-
-    if ($canUseAdvancedCode) {
-        $page->setVar('header_code',  $_POST['header_code']  ?? '');
-        $page->setVar('footer_code',  $_POST['footer_code']  ?? '');
-    } elseif ($pageId) {
-        $page->setVar('header_code',  $page->getVar('header_code', 'n'));
-        $page->setVar('footer_code',  $page->getVar('footer_code', 'n'));
+        $errorMsg = implode('<br>', $GLOBALS['xoopsSecurity']->getErrors());
+        echo '<div style="color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;padding:12px;border-radius:6px;margin-bottom:16px">' . $errorMsg . '</div>';
     } else {
-        $page->setVar('header_code',  '');
-        $page->setVar('footer_code',  '');
-    }
-    $page->setVar('uid',          (int)($GLOBALS['xoopsUser']->getVar('uid') ?? 0));
+        $page = $pageId ? $pageHandler->get($pageId) : $pageHandler->create();
+        if (!$page) {
+            echo '<div style="color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;padding:12px;border-radius:6px;margin-bottom:16px">' . _AM_XPAGES_PAGE_NOT_FOUND . '</div>';
+        } else {
+            $parentId = (int)($_POST['parent_id'] ?? 0);
+            if ($pageId && $parentId > 0 && ($parentId === $pageId || in_array($parentId, $descendantIds, true))) {
+                echo '<div style="color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;padding:12px;border-radius:6px;margin-bottom:16px">' . _AM_XPAGES_PARENT_INVALID . '</div>';
+            } else {
+                $page->setVar('title',        $_POST['title']        ?? '');
+                $page->setVar('body',         $_POST['body']         ?? '');
+                $page->setVar('short_desc',   $_POST['short_desc']   ?? '');
+                $page->setVar('page_status',  (int)($_POST['page_status']  ?? 1));
+                $page->setVar('menu_order',   (int)($_POST['menu_order']   ?? 0));
+                $page->setVar('show_in_menu', (int)($_POST['show_in_menu'] ?? 0));
+                $page->setVar('show_in_nav',  (int)($_POST['show_in_nav']  ?? 0));
+                $page->setVar('parent_id',    $parentId);
+                $page->setVar('meta_title',    $_POST['meta_title']    ?? '');
+                $page->setVar('meta_keywords', $_POST['meta_keywords'] ?? '');
+                $page->setVar('meta_desc',     $_POST['meta_desc']     ?? '');
+                $page->setVar('noindex',      isset($_POST['noindex'])  ? 1 : 0);
+                $page->setVar('nofollow',     isset($_POST['nofollow']) ? 1 : 0);
+                $page->setVar('redirect_url', xpages_normalize_url($_POST['redirect_url'] ?? ''));
 
-    $rawAlias = trim($_POST['alias'] ?? '');
-    if (empty($rawAlias)) {
-        $rawAlias = (string)$page->getVar('title', 'n');
-    }
-    $page->setVar('alias', $pageHandler->generateAlias($rawAlias, $pageId));
-
-    if (!$pageId) {
-        $page->setVar('create_date', time());
-    }
-    $page->setVar('update_date', time());
-
-    if (!$pageHandler->insert($page)) {
-        echo '<div style="color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;padding:12px;border-radius:6px;margin-bottom:16px">' . _AM_XPAGES_SAVE_ERROR . '</div>';
-    } else {
-        $savedId = (int)$page->getVar('page_id');
-        
-        $values = array();
-        
-        if (!empty($_POST['extra_fields']) && is_array($_POST['extra_fields'])) {
-            foreach ($_POST['extra_fields'] as $fid => $val) {
-                if (is_array($val)) {
-                    $values[(int)$fid] = implode('|', $val);
+                if ($canUseAdvancedCode) {
+                    $page->setVar('header_code',  $_POST['header_code']  ?? '');
+                    $page->setVar('footer_code',  $_POST['footer_code']  ?? '');
+                } elseif ($pageId) {
+                    $page->setVar('header_code',  $page->getVar('header_code', 'n'));
+                    $page->setVar('footer_code',  $page->getVar('footer_code', 'n'));
                 } else {
-                    $values[(int)$fid] = (string)$val;
+                    $page->setVar('header_code',  '');
+                    $page->setVar('footer_code',  '');
                 }
-            }
-        }
-        
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
-        xpages_ensure_upload_dir($uploadDir);
-        
-        if (!empty($_FILES['extra_files'])) {
-            foreach ($_FILES['extra_files']['name'] as $fid => $fileName) {
-                if (empty($fileName)) continue;
-                
-                if ($_FILES['extra_files']['error'][$fid] === UPLOAD_ERR_OK) {
-                    $field = $fieldHandler->get((int)$fid);
-                    if ($field && $field->getVar('field_type') === 'file') {
-                        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                        $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'zip'];
-                        
-                        if (in_array($ext, $allowedExts, true) && xpages_upload_is_allowed($_FILES['extra_files']['tmp_name'][$fid], $ext)) {
-                            $randomPart = bin2hex(random_bytes(6));
-                            $newFileName = 'page_' . $savedId . '_field_' . $fid . '_' . $randomPart . '.' . $ext;
-                            if (move_uploaded_file($_FILES['extra_files']['tmp_name'][$fid], $uploadDir . $newFileName)) {
-                                $values[(int)$fid] = $newFileName;
+                $page->setVar('uid',          (int)($GLOBALS['xoopsUser']->getVar('uid') ?? 0));
+
+                $rawAlias = trim($_POST['alias'] ?? '');
+                if (empty($rawAlias)) {
+                    $rawAlias = (string)$page->getVar('title', 'n');
+                }
+                $page->setVar('alias', $pageHandler->generateAlias($rawAlias, $pageId));
+
+                if (!$pageId) {
+                    $page->setVar('create_date', time());
+                }
+                $page->setVar('update_date', time());
+
+                if (!$pageHandler->insert($page)) {
+                    echo '<div style="color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;padding:12px;border-radius:6px;margin-bottom:16px">' . _AM_XPAGES_SAVE_ERROR . '</div>';
+                } else {
+                    $savedId = (int)$page->getVar('page_id');
+                    
+                    $values = array();
+                    
+                    if (!empty($_POST['extra_fields']) && is_array($_POST['extra_fields'])) {
+                        foreach ($_POST['extra_fields'] as $fid => $val) {
+                            if (is_array($val)) {
+                                $values[(int)$fid] = implode('|', $val);
+                            } else {
+                                $values[(int)$fid] = (string)$val;
                             }
                         }
                     }
+                    
+                    $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
+                    xpages_ensure_upload_dir($uploadDir);
+                    
+                    if (!empty($_FILES['extra_files'])) {
+                        foreach ($_FILES['extra_files']['name'] as $fid => $fileName) {
+                            if (empty($fileName)) continue;
+                            
+                            if ($_FILES['extra_files']['error'][$fid] === UPLOAD_ERR_OK) {
+                                $field = $fieldHandler->get((int)$fid);
+                                if ($field && $field->getVar('field_type') === 'file') {
+                                    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                                    $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'zip'];
+                                    
+                                    if (in_array($ext, $allowedExts, true)) {
+                                        $randomPart = bin2hex(random_bytes(6));
+                                        $newFileName = 'page_' . $savedId . '_field_' . $fid . '_' . $randomPart . '.' . $ext;
+                                        if (move_uploaded_file($_FILES['extra_files']['tmp_name'][$fid], $uploadDir . $newFileName)) {
+                                            $values[(int)$fid] = $newFileName;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    $valueHandler->saveValuesForPage($savedId, $values);
+                    
+                    // Başarılı kayıt sonrası yönlendir
+                    redirect_header('pages.php', 2, _AM_XPAGES_PAGE_SAVED);
+                    exit;
                 }
             }
         }
-        
-        $valueHandler->saveValuesForPage($savedId, $values);
-        
-        redirect_header('pages.php', 2, _AM_XPAGES_PAGE_SAVED);
-        exit;
     }
 }
 
@@ -158,25 +162,20 @@ $extraFields    = $pageId ? $fieldHandler->getFieldsForPage($pageId, false) : $f
 $allPages = $pageHandler->getObjects() ?: array();
 $blockedParentIds = array_flip($descendantIds);
 
-// ── XOOPS Editörü - DÜZELTİLDİ ─────────────────────────────────────────────
+// ── XOOPS Editörü ─────────────────────────────────────────────────────────────
 $bodyContent = (string)$page->getVar('body', 'n');
 $editorHtml = '';
 
-// XOOPS editör sistemini kullan
 if (file_exists(XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php')) {
     require_once XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php';
     
     if (class_exists('XoopsEditorHandler')) {
         $editorHandler = XoopsEditorHandler::getInstance();
-        
-        // Mevcut editörleri kontrol et
         $editors = $editorHandler->getList();
         
-        // Tercih edilen editör (tinyMCE, ckeditor, dhtml, textarea)
-        $preferredEditor = 'tinymce';
-        
-        if (isset($editors[$preferredEditor])) {
-            $editor = $editorHandler->get($preferredEditor, [
+        if (isset($editors['tinymce']) || isset($editors['tinymce7'])) {
+            $editorType = isset($editors['tinymce7']) ? 'tinymce7' : 'tinymce';
+            $editor = $editorHandler->get($editorType, [
                 'name' => 'body',
                 'value' => $bodyContent,
                 'rows' => 25,
@@ -187,10 +186,7 @@ if (file_exists(XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php')) {
             if ($editor && method_exists($editor, 'render')) {
                 $editorHtml = $editor->render();
             }
-        }
-        
-        // TinyMCE yoksa dhtml editörü dene
-        if (empty($editorHtml) && isset($editors['dhtml'])) {
+        } elseif (isset($editors['dhtml'])) {
             $editor = $editorHandler->get('dhtml', [
                 'name' => 'body',
                 'value' => $bodyContent,
@@ -201,17 +197,10 @@ if (file_exists(XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php')) {
                 $editorHtml = $editor->render();
             }
         }
-        
-        // Hiçbir editör yoksa textarea kullan
-        if (empty($editorHtml)) {
-            $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
-        }
-    } else {
-        // XoopsEditorHandler sınıfı yoksa textarea kullan
-        $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
     }
-} else {
-    // xoopseditor.php dosyası yoksa textarea kullan
+}
+
+if (empty($editorHtml)) {
     $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
 }
 ?>
@@ -293,17 +282,17 @@ if (file_exists(XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php')) {
             <label><input type="checkbox" name="show_in_nav" value="1" <?= $page->getVar('show_in_nav') ? 'checked' : '' ?>> <?= _AM_XPAGES_SHOW_IN_NAV ?></label>
         </div>
     </div>
-<div class="xpages-field">
-    <label><?= _AM_XPAGES_PARENT_PAGE ?></label>
-    <select name="parent_id">
-        <option value="0"><?= _AM_XPAGES_NO_PARENT ?></option>
-        <?php foreach ($allPages as $ap):
-            $apId = (int)$ap->getVar('page_id');
-            if ($apId === $pageId || isset($blockedParentIds[$apId])) continue; ?>
-        <option value="<?= $ap->getVar('page_id') ?>" <?= (int)$page->getVar('parent_id') === (int)$ap->getVar('page_id') ? 'selected' : '' ?>>
-            <?= htmlspecialchars((string)$ap->getVar('title'), ENT_QUOTES) ?>
-        </option>
-        <?php endforeach; ?>
+    <div class="xpages-field">
+        <label><?= _AM_XPAGES_PARENT_PAGE ?></label>
+        <select name="parent_id">
+            <option value="0"><?= _AM_XPAGES_NO_PARENT ?></option>
+            <?php foreach ($allPages as $ap):
+                $apId = (int)$ap->getVar('page_id');
+                if ($apId === $pageId || isset($blockedParentIds[$apId])) continue; ?>
+                <option value="<?= $ap->getVar('page_id') ?>" <?= (int)$page->getVar('parent_id') === (int)$ap->getVar('page_id') ? 'selected' : '' ?>>
+                    <?= htmlspecialchars((string)$ap->getVar('title'), ENT_QUOTES) ?>
+                </option>
+            <?php endforeach; ?>
         </select>
     </div>
 </div>
@@ -403,12 +392,11 @@ function xpShowTab(el, id) {
     el.parentElement.classList.add('active');
 }
 
-// TinyMCE için kaydetme işlemi
+// Editör için kaydetme işlemi
 document.getElementById('xpages-edit-form').addEventListener('submit', function() {
     if (typeof tinyMCE !== 'undefined') {
         tinyMCE.triggerSave();
     }
-    // CKEditor için
     if (typeof CKEDITOR !== 'undefined') {
         for (var instance in CKEDITOR.instances) {
             CKEDITOR.instances[instance].updateElement();
