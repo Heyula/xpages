@@ -28,7 +28,7 @@ define('_MI_XPAGES_SHOW_BREADCRUMB_DESC',  'Display navigation path above page t
 define('_MI_XPAGES_SHOW_LASTMOD',          'Show last modified date');
 define('_MI_XPAGES_SHOW_LASTMOD_DESC',     'Show when the page was last edited.');
 // İlave alanlar için başlık
-define('_MD_XPAGES_EXTRA_FIELDS', 'Ek Bilgiler');
+define('_MD_XPAGES_EXTRA_FIELDS', 'Additional Information');
 // Menu
 define('_AM_XPAGES_MENU_MAIN',     'Home');
 define('_AM_XPAGES_MENU_PAGES',    'Pages');
