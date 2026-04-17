@@ -95,9 +95,9 @@ if (count($pages) > 0) {
     echo '<tr style="background:#f8f9fa;border-bottom:2px solid #dee2e6">';
     echo '<th style="padding:11px 14px;text-align:left;font-size:13px">ID</th>';
     echo '<th style="padding:11px 14px;text-align:left;font-size:13px">' . _AM_XPAGES_PAGE_TITLE . '</th>';
-    echo '<th style="padding:11px 14px;text-align:left;font-size:13px">' . _AM_XPAGES_PAGE_ALIAS . '</th>';
+    echo '<th style="padding:11px 14px;text-align:left;font-size:13px">URL Alias</th>';
     echo '<th style="padding:11px 14px;text-align:center;font-size:13px">' . _AM_XPAGES_PAGE_STATUS . '</th>';
-    echo '<th style="padding:11px 14px;text-align:center;font-size:13px">' . _AM_XPAGES_PAGE_ORDER . '</th>';
+    echo '<th style="padding:11px 14px;text-align:center;font-size:13px">Sort Order</th>';
     echo '<th style="padding:11px 14px;text-align:center;font-size:13px">' . _AM_XPAGES_ACTIONS . '</th>';
     echo '</tr></thead><tbody>';
 
@@ -105,23 +105,32 @@ if (count($pages) > 0) {
         $pid    = (int)$p->getVar('page_id');
         $status = (int)$p->getVar('page_status');
         $bg     = $i % 2 ? '#f8f9fa' : '#fff';
+        
+        // Sayfa URL'ini oluştur
+        $alias = $p->getVar('alias', 'n');
+        if (!empty($alias)) {
+            $pageUrl = XOOPS_URL . '/modules/xpages/page.php?alias=' . urlencode($alias);
+        } else {
+            $pageUrl = XOOPS_URL . '/modules/xpages/page.php?page_id=' . $pid;
+        }
 
         echo '<tr style="border-bottom:1px solid #dee2e6;background:' . $bg . '">';
         echo '<td style="padding:11px 14px;font-size:13px">' . $pid . '</td>';
         echo '<td style="padding:11px 14px"><strong>' . htmlspecialchars((string)$p->getVar('title'), ENT_QUOTES) . '</strong></td>';
-        echo '<td style="padding:11px 14px"><code style="background:#f1f3f5;padding:2px 6px;border-radius:3px;font-size:12px">' . htmlspecialchars((string)$p->getVar('alias', 'n'), ENT_QUOTES) . '</code></td>';
+        echo '<td style="padding:11px 14px"><code style="background:#f1f3f5;padding:2px 6px;border-radius:3px;font-size:12px">' . htmlspecialchars($alias, ENT_QUOTES) . '</code></td>';
         echo '<td style="padding:11px 14px;text-align:center">';
         echo '<form method="post" action="pages.php" style="display:inline;margin:0">';
         echo '<input type="hidden" name="op" value="toggle">';
         echo '<input type="hidden" name="page_id" value="' . $pid . '">';
         echo $GLOBALS['xoopsSecurity']->getTokenHTML();
         echo '<button type="submit" title="' . _AM_XPAGES_TOGGLE_STATUS_TITLE . '" style="background:none;border:none;padding:0;text-decoration:none;cursor:pointer">';
-        echo $status ? _AM_XPAGES_STATUS_ACTIVE : _AM_XPAGES_STATUS_INACTIVE;
+        echo $status ? '✅ Aktif' : '❌ Pasif';
         echo '</button></form></td>';
         echo '<td style="padding:11px 14px;text-align:center">' . (int)$p->getVar('menu_order') . '</td>';
         echo '<td style="padding:11px 14px;text-align:center">';
         echo '<div style="display:flex;gap:10px;justify-content:center">';
         echo '<a href="page_edit.php?page_id=' . $pid . '" style="color:#007bff;text-decoration:none;font-size:13px" title="' . _AM_XPAGES_EDIT . '">✏️ ' . _AM_XPAGES_EDIT . '</a>';
+        echo '<a href="' . $pageUrl . '" target="_blank" style="color:#17a2b8;text-decoration:none;font-size:13px" title="' . _AM_XPAGES_PAGETO . '">👁️ ' . _AM_XPAGES_PAGETO . '</a>';
         echo '<a href="pages.php?op=delete&page_id=' . $pid . '" style="color:#dc3545;text-decoration:none;font-size:13px" title="' . _AM_XPAGES_DELETE . '">🗑️ ' . _AM_XPAGES_DELETE . '</a>';
         echo '</div></td>';
         echo '</tr>';
@@ -141,3 +150,4 @@ if (count($pages) > 0) {
 }
 
 xoops_cp_footer();
+?>
