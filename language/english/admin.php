@@ -98,6 +98,7 @@ define('_AM_XPAGES_YES',               'Yes');
 define('_AM_XPAGES_NO',                'No');
 define('_AM_XPAGES_ACTIONS',           'Actions');
 define('_AM_XPAGES_BROWSE',            'Browse');
+define('_AM_XPAGES_PAGETO',            'Go to page');
 
 // Messages
 define('_AM_XPAGES_PAGE_SAVED',          'Page saved successfully.');
