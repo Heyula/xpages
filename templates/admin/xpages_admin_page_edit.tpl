@@ -19,8 +19,9 @@
       $can_use_advanced_code     — bool; gates the header/footer_code
                                    textareas vs. a "restricted" notice
       $has_extra_fields          — bool; shows the Extra tab
-      $extra_fields_html         — pre-rendered HTML (from xpages_render_
-                                   field_input), rendered via {nofilter}
+      $extra_fields              — list of field descriptors (see
+                                   xpages_build_field_descriptor);
+                                   rendered via xpages_field_input.tpl
       $label_*                   — translated copy (see keys below)
       $xoops_token_html          — auto-injected by xpages_admin_render() *}>
 
@@ -168,7 +169,9 @@
     <{* ── TAB: İlave Alanlar ── *}>
     <{if $has_extra_fields}>
         <div id="tab-extra" class="xp-tab-pane">
-            <{$extra_fields_html nofilter}>
+            <{foreach item=field from=$extra_fields}>
+                <{include file="xpages_field_input.tpl" field=$field}>
+            <{/foreach}>
         </div>
     <{/if}>
 

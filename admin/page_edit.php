@@ -197,15 +197,17 @@ foreach ($allPages as $ap) {
     ];
 }
 
-// Pre-render extra-field inputs via the existing helper (xpages_render_
-// field_input returns HTML). 6g will convert that helper into its own
-// template; for now we pass the assembled HTML to the page_edit template
-// via a {nofilter} slot.
-$extraFieldsHtml = '';
+// Build a flat descriptor for each extra field. The page_edit template
+// loops over these and includes xpages_field_input.tpl for each one —
+// no more nofilter slot, no more pre-assembled HTML string.
+$extraFieldRows = [];
 foreach ($extraFields as $field) {
-    $fid             = (int)$field->getVar('field_id');
-    $val             = $existingValues[$fid] ?? (string)$field->getVar('field_default', 'n');
-    $extraFieldsHtml .= xpages_render_field_input($field, $val);
+    $fid = (int)$field->getVar('field_id');
+    $val = $existingValues[$fid] ?? (string)$field->getVar('field_default', 'n');
+    $descriptor = xpages_build_field_descriptor($field, $val);
+    if ($descriptor !== null) {
+        $extraFieldRows[] = $descriptor;
+    }
 }
 
 xpages_admin_render('xpages_admin_page_edit.tpl', [
@@ -232,8 +234,8 @@ xpages_admin_render('xpages_admin_page_edit.tpl', [
     ],
     'parent_options'               => $parentOptions,
     'can_use_advanced_code'        => $canUseAdvancedCode,
-    'has_extra_fields'             => (count($extraFields) > 0),
-    'extra_fields_html'            => $extraFieldsHtml,
+    'has_extra_fields'             => (count($extraFieldRows) > 0),
+    'extra_fields'                 => $extraFieldRows,
 
     // Labels (controller-assigned so the template doesn't depend on the
     // _AM_* constants being in scope at render time).
