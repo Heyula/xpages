@@ -1,0 +1,99 @@
+/*!
+ * xPages — Public stylesheet
+ * Loaded by xpages_register_public_css() from page.php / index.php
+ * via $GLOBALS['xoTheme']->addStylesheet(). Admin-side CSS lives in
+ * admin.css.
+ *
+ * Class naming:
+ *   .xpages-public-*  — module-scoped public widgets
+ *   .xpf-*            — extra-field renderers
+ *   .gallery-item     — kept for LightGallery compat (the lib looks it up)
+ *   .lg-*             — LightGallery library overrides (see below)
+ */
+
+/* ==========================================================================
+   LightGallery customisation (public-facing gallery lightbox)
+   -------------------------------------------------------------------------
+   Overrides the vendor CSS loaded from jsDelivr at the top of
+   xpages_page.tpl. Kept scoped to .lg-* so nothing leaks into the rest
+   of the theme.
+   ========================================================================== */
+.lg-outer .lg-thumb-item {
+    border-radius: 4px;
+    border: 2px solid transparent;
+}
+.lg-outer .lg-thumb-item.active,
+.lg-outer .lg-thumb-item:hover {
+    border-color: #007bff;
+}
+.lg-toolbar .lg-icon {
+    color: #fff;
+}
+.lg-sub-html {
+    background: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Public gallery grid (responsive card layout inside a page's gallery)
+   ========================================================================== */
+.xpages-public-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Anchor that wraps each card — LightGallery looks up by this class. */
+.gallery-item {
+    text-decoration: none;
+    display: block;
+}
+
+.xpages-public-gallery-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    background: #fff;
+    height: 100%;
+}
+.gallery-item:hover .xpages-public-gallery-card {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.xpages-public-gallery-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+.gallery-item:hover .xpages-public-gallery-img {
+    transform: scale(1.03);
+}
+
+.xpages-public-gallery-body {
+    padding: 12px;
+}
+.xpages-public-gallery-body h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    color: #333;
+}
+.xpages-public-gallery-body p {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   Extra-field file-type renderer (image preview inside a textarea-rendered
+   extra field). Capped at 300px height so large uploads don't blow out
+   the layout.
+   ========================================================================== */
+.xpf-file-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 5px;
+}

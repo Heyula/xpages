@@ -38,11 +38,70 @@ function xpages_get_handler($name) {
 }
 
 /**
- * Admin boot - dil dosyalarını yükle
+ * Admin boot — load language files + enforce module-level admin rights.
+ *
+ * XOOPS's include/cp_header.php verifies system-admin-group membership, but
+ * a site may grant module-level admin rights to a narrower group (via
+ * system admin → groups → module admin). Without this guard, any user in
+ * the system-admin group can reach xpages admin pages even if they were
+ * only granted admin on a DIFFERENT module.
  */
 function xpages_admin_boot() {
     xpages_load_language('admin');
     xpages_load_language('modinfo');
+    xpages_require_module_admin();
+}
+
+/**
+ * Register the module's admin stylesheet with the XOOPS admin theme.
+ *
+ * Must be called AFTER xoops_cp_header() because $GLOBALS['xoTheme'] is
+ * populated by that call. All admin controllers invoke this via the
+ * common bootstrap path: xpages_admin_boot() → xoops_cp_header() → this.
+ */
+function xpages_admin_register_css(): void {
+    if (!isset($GLOBALS['xoTheme']) || !is_object($GLOBALS['xoTheme'])) {
+        return;
+    }
+    $GLOBALS['xoTheme']->addStylesheet(XOOPS_URL . '/modules/xpages/assets/css/admin.css');
+}
+
+/**
+ * Register the module's public-facing stylesheet.
+ *
+ * Must be called AFTER XOOPS_ROOT_PATH/header.php has been included (the
+ * main public header is what populates $xoTheme on the front-end). Used
+ * by page.php and index.php so the public layout can use class names
+ * instead of inline style attributes in the .tpl templates.
+ */
+function xpages_register_public_css(): void {
+    if (!isset($GLOBALS['xoTheme']) || !is_object($GLOBALS['xoTheme'])) {
+        return;
+    }
+    $GLOBALS['xoTheme']->addStylesheet(XOOPS_URL . '/modules/xpages/assets/css/style.css');
+}
+
+/**
+ * Redirect any request that isn't from a user with admin rights
+ * specifically for the xpages module. Call at the top of every admin
+ * controller (done automatically via xpages_admin_boot()).
+ */
+function xpages_require_module_admin(): void {
+    global $xoopsUser, $xoopsModule;
+
+    // cp_header.php already enforced the system admin-group check; this is
+    // defense-in-depth for the per-module admin ACL.
+    if (!is_object($xoopsUser)
+        || !is_object($xoopsModule)
+        || !$xoopsUser->isAdmin($xoopsModule->getVar('mid'))
+    ) {
+        redirect_header(
+            XOOPS_URL . '/user.php',
+            3,
+            defined('_NOPERM') ? _NOPERM : 'You do not have permission to access this page.'
+        );
+        exit;
+    }
 }
 
 /**
@@ -283,7 +342,9 @@ function xpages_render_field_input($field, $value = '') {
                     if ($opt === '') continue;
                     $checked = ($opt == $value) ? ' checked' : '';
                     $radioId = 'extra_field_' . $fid . '_' . $i;
-                    $html .= '<label for="' . $radioId . '" style="display:inline-block;margin-right:15px;font-weight:normal">';
+                    // .xpages-radio-group label (from admin.css) supplies the
+                    // inline-block / margin / normal-weight declarations.
+                    $html .= '<label for="' . $radioId . '">';
                     $html .= '<input type="radio" name="' . $name . '" id="' . $radioId . '" value="' . htmlspecialchars($opt, ENT_QUOTES) . '"' . $checked . $required . '> ' . htmlspecialchars($opt, ENT_QUOTES);
                     $html .= '</label>';
                     $i++;
@@ -301,18 +362,18 @@ function xpages_render_field_input($field, $value = '') {
                 $safeValue = xpages_safe_filename((string)$value);
                 $fileUrl = $safeValue !== '' ? $uploadUrl . rawurlencode($safeValue) : '';
                 $ext = strtolower(pathinfo($safeValue, PATHINFO_EXTENSION));
-                $html .= '<div class="xpages-current-file" style="margin-top:8px">';
+                $html .= '<div class="xpages-current-file xp-margin-top-8">';
                 $html .= '<small><strong>' . _AM_XPAGES_FILE_CURRENT_LABEL . '</strong><br>';
                 if ($fileUrl && in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
-                    $html .= '<img src="' . $fileUrl . '" style="max-width:150px;max-height:150px;margin-top:5px;border-radius:4px;border:1px solid #dee2e6">';
+                    $html .= '<img src="' . $fileUrl . '" class="xpf-preview--md" alt="">';
                 } elseif ($fileUrl) {
-                    $html .= '<a href="' . $fileUrl . '" target="_blank">📎 ' . htmlspecialchars($value) . '</a>';
+                    $html .= '<a href="' . $fileUrl . '" target="_blank" rel="noopener">📎 ' . htmlspecialchars($value) . '</a>';
                 }
-                $html .= '<br><span style="color:#6c757d;font-size:11px">' . _AM_XPAGES_FILE_REPLACE_NOTE . '</span>';
+                $html .= '<br><span class="xp-text-muted xp-text-small">' . _AM_XPAGES_FILE_REPLACE_NOTE . '</span>';
                 $html .= '</small></div>';
                 $html .= '<input type="hidden" name="' . $name . '" value="' . htmlspecialchars($safeValue, ENT_QUOTES) . '">';
             } else {
-                $html .= '<small class="xpf-desc" style="display:block;margin-top:5px">' . _AM_XPAGES_FILE_NONE . '</small>';
+                $html .= '<small class="xpf-desc xpf-block-note">' . _AM_XPAGES_FILE_NONE . '</small>';
             }
             $html .= '</div>';
             break;
@@ -551,7 +612,7 @@ function xpages_render_editor($name, $value, $rows = 25, $cols = '100%') {
     
     // Hiçbir editör yoksa textarea döndür
     if (empty($editorHtml)) {
-        $editorHtml = '<textarea name="' . htmlspecialchars($name, ENT_QUOTES) . '" id="' . htmlspecialchars($name, ENT_QUOTES) . '" rows="' . (int)$rows . '" style="width:100%;font-family:monospace">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
+        $editorHtml = '<textarea name="' . htmlspecialchars($name, ENT_QUOTES) . '" id="' . htmlspecialchars($name, ENT_QUOTES) . '" rows="' . (int)$rows . '" class="xp-code-textarea">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
     }
     
     return $editorHtml;

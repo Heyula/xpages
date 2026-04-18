@@ -48,6 +48,7 @@ define('_AM_XPAGES_FOOTER_CODE',       'Footer Code (</body>)');
 define('_AM_XPAGES_FOOTER_CODE_HELP',  'Code to be injected before this page\'s </body> tag only (JS, etc.)');
 define('_AM_XPAGES_MANAGE_FIELDS_FOR_PAGE', 'Manage Fields for This Page');
 define('_AM_XPAGES_ADVANCED_CODE_RESTRICTED', 'Only website webmasters can edit header/footer code.');
+define('_AM_XPAGES_ADVANCED_CODE_WARNING',    'Warning: content below is injected into every visitor\'s page AS-IS — including &lt;script&gt; and &lt;iframe&gt;. Any stored XSS here runs on every public view of this page. Only paste code you have personally authored or trust completely.');
 
 // Extra field form
 define('_AM_XPAGES_ADD_FIELD',             'Add Field');

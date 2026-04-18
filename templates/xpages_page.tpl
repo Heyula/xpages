@@ -30,26 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-.lg-outer .lg-thumb-item {
-    border-radius: 4px;
-    border: 2px solid transparent;
-}
-.lg-outer .lg-thumb-item.active,
-.lg-outer .lg-thumb-item:hover {
-    border-color: #007bff;
-}
-.lg-toolbar .lg-icon {
-    color: #fff;
-}
-.lg-sub-html {
-    background: rgba(0,0,0,0.7);
-    font-size: 14px;
-}
-</style>
-
-
-<{* xPages — Tekil Sayfa Şablonu (DÜZELTİLMİŞ) *}>
+<{* xPages — Tekil Sayfa Şablonu (DÜZELTİLMİŞ)
+    LightGallery / gallery-card CSS is served from assets/css/style.css —
+    registered by xpages_register_public_css() in page.php. *}>
 
 <{* Sayfa başı özel kod enjeksiyonu *}>
 <{if $xpages_header_code}>
@@ -109,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 							<{* Dosya/Resim gösterimi *}>
 							<{assign var="fileExt" value=$f.file_ext|lower}>
 							<{if $fileExt == 'jpg' || $fileExt == 'jpeg' || $fileExt == 'png' || $fileExt == 'gif' || $fileExt == 'webp'}>
-								<img src="<{$f.value|escape:'html'}>" alt="<{$f.field_label}>" style="max-width:100%;max-height:300px;border-radius:5px">
+								<img src="<{$f.value|escape:'html'}>" alt="<{$f.field_label}>" class="xpf-file-image">
 							<{else}>
 								<a href="<{$f.value|escape:'html'}>" target="_blank" rel="noopener">📎 <{$smarty.const._MD_XPAGES_DOWNLOAD_FILE}></a>
 							<{/if}>
@@ -139,34 +122,20 @@ document.addEventListener('DOMContentLoaded', function() {
 <{* ── Galeri Bölümü (LightGallery ile) ──────────────────────────────────────── *}>
 <{if $xpages_gallery}>
 <section class="xpages-gallery">
-    <div id="xpages-lightgallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px">
+    <div id="xpages-lightgallery" class="xpages-public-gallery">
         <{foreach item=g from=$xpages_gallery key=index}>
         <a href="<{$g.image_url}>" class="gallery-item" data-src="<{$g.image_url}>" data-sub-html="<h4><{$g.title|escape:'html'}></h4><p><{$g.description|escape:'html'}></p>">
-            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);transition:all 0.3s;background:#fff;height:100%">
-                <img src="<{$g.image_url}>" alt="<{$g.title|escape:'html'}>" loading="lazy" style="width:100%;height:220px;object-fit:cover;transition:transform 0.5s">
-                <div style="padding:12px">
-                    <h4 style="margin:0 0 6px;font-size:15px;color:#333"><{$g.title}></h4>
-                    <p style="margin:0;font-size:12px;color:#888;line-height:1.4"><{$g.description}></p>
+            <div class="xpages-public-gallery-card">
+                <img src="<{$g.image_url}>" alt="<{$g.title|escape:'html'}>" loading="lazy" class="xpages-public-gallery-img">
+                <div class="xpages-public-gallery-body">
+                    <h4><{$g.title}></h4>
+                    <p><{$g.description}></p>
                 </div>
             </div>
         </a>
         <{/foreach}>
     </div>
 </section>
-
-<style>
-.gallery-item {
-    text-decoration: none;
-    display: block;
-}
-.gallery-item > div:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-.gallery-item > div:hover img {
-    transform: scale(1.03);
-}
-</style>
 <{/if}>
 
 <hr>

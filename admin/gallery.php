@@ -5,11 +5,14 @@
  * @author   Eren Yumak — Aymak (aymak.net)
  */
 
+use Xmf\Request;
+
 include_once '../../../include/cp_header.php';
 require_once XOOPS_ROOT_PATH . '/modules/xpages/include/functions.php';
 xpages_admin_boot();
 
 xoops_cp_header();
+xpages_admin_register_css();
 
 if (class_exists('Xmf\\Module\\Admin')) {
     \Xmf\Module\Admin::getInstance()->displayNavigation('gallery.php');
@@ -19,42 +22,42 @@ $galleryHandler = xpages_get_handler('gallery');
 $pageHandler    = xpages_get_handler('page');
 
 if (!$galleryHandler || !$pageHandler) {
-    echo '<div style="margin:18px 0;padding:14px 16px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:6px">xPages handler unavailable.</div>';
+    echo '<div class="xp-alert xp-alert--error">xPages handler unavailable.</div>';
     xoops_cp_footer();
     exit;
 }
 
-$pageId = isset($_GET['page_id']) ? (int)$_GET['page_id'] : (isset($_POST['page_id']) ? (int)$_POST['page_id'] : 0);
-$op     = $_GET['op'] ?? $_POST['op'] ?? 'list';
-$galleryId = isset($_GET['gallery_id']) ? (int)$_GET['gallery_id'] : (isset($_POST['gallery_id']) ? (int)$_POST['gallery_id'] : 0);
+$pageId    = Request::getInt('page_id',    0,      'REQUEST');
+$op        = Request::getCmd('op',         'list', 'REQUEST');
+$galleryId = Request::getInt('gallery_id', 0,      'REQUEST');
 
 $pageObj   = $pageId ? $pageHandler->get($pageId) : null;
 $pageTitle = $pageObj ? htmlspecialchars((string)$pageObj->getVar('title'), ENT_QUOTES) : _AM_XPAGES_GALLERY_ALL_PAGES;
 
-echo '<div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 20px">';
-echo '<h2 style="margin:0;font-size:20px">' . _AM_XPAGES_GALLERY_TITLE . '</h2>';
-echo '<span style="color:#6b7280;font-size:16px">— ' . $pageTitle . '</span>';
+echo '<div class="xp-toolbar xp-toolbar--inline">';
+echo '<h2>' . _AM_XPAGES_GALLERY_TITLE . '</h2>';
+echo '<span class="xp-text-muted">— ' . $pageTitle . '</span>';
 echo '</div>';
 
 if ($pageId && $pageObj) {
-    echo '<p style="margin:0 0 14px"><a href="page_edit.php?page_id=' . $pageId . '" style="color:#007bff;text-decoration:none;font-size:13px">◀ ' . _AM_XPAGES_BACK_TO_PAGE . '</a></p>';
+    echo '<p><a href="page_edit.php?page_id=' . $pageId . '" class="xp-action--edit">◀ ' . _AM_XPAGES_BACK_TO_PAGE . '</a></p>';
 }
 
 // ── Sil ───────────────────────────────────────────────────────────────────────
 if ($op === 'delete' && $galleryId) {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['confirm'])) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || 1 !== Request::getInt('confirm', 0, 'POST')) {
         $gobj = $galleryHandler->get($galleryId);
         if ($gobj) {
-            echo '<div style="background:#fff3cd;border:1px solid #ffc107;padding:18px;margin-bottom:16px;border-radius:8px">';
-            echo '<p style="margin:0 0 12px">⚠️ ' . sprintf(_AM_XPAGES_GALLERY_DELETE_CONFIRM, htmlspecialchars((string)$gobj->getVar('title'), ENT_QUOTES)) . '</p>';
-            echo '<form method="post" action="gallery.php?op=delete&gallery_id=' . $galleryId . '&page_id=' . $pageId . '" style="display:flex;gap:10px;align-items:center">';
+            echo '<div class="xp-alert xp-alert--warning">';
+            echo '<p>⚠️ ' . sprintf(_AM_XPAGES_GALLERY_DELETE_CONFIRM, htmlspecialchars((string)$gobj->getVar('title'), ENT_QUOTES)) . '</p>';
+            echo '<form method="post" action="gallery.php?op=delete&gallery_id=' . $galleryId . '&page_id=' . $pageId . '" class="xp-confirm-actions">';
             echo '<input type="hidden" name="op" value="delete">';
             echo '<input type="hidden" name="gallery_id" value="' . $galleryId . '">';
             echo '<input type="hidden" name="page_id" value="' . $pageId . '">';
             echo '<input type="hidden" name="confirm" value="1">';
             echo $GLOBALS['xoopsSecurity']->getTokenHTML();
-            echo '<button type="submit" style="background:#dc3545;color:#fff;padding:7px 16px;border:none;border-radius:5px;cursor:pointer">' . _AM_XPAGES_YES . '</button>';
-            echo '<a href="gallery.php?page_id=' . $pageId . '" style="background:#6c757d;color:#fff;padding:7px 16px;text-decoration:none;border-radius:5px">' . _AM_XPAGES_NO . '</a>';
+            echo '<button type="submit" class="xp-btn xp-btn--danger">' . _AM_XPAGES_YES . '</button>';
+            echo '<a href="gallery.php?page_id=' . $pageId . '" class="xp-btn xp-btn--cancel">' . _AM_XPAGES_NO . '</a>';
             echo '</form></div>';
         }
         xoops_cp_footer();
@@ -94,14 +97,14 @@ if ($op === 'save') {
     $gallery = $galleryId ? $galleryHandler->get($galleryId) : $galleryHandler->create();
 
     $gallery->setVar('page_id',       $pageId);
-    $gallery->setVar('title',         $_POST['title'] ?? '');
-    $gallery->setVar('description',   $_POST['description'] ?? '');
-    $gallery->setVar('image_order',   (int)($_POST['image_order'] ?? 0));
-    $gallery->setVar('image_status',  (int)($_POST['image_status'] ?? 1));
+    $gallery->setVar('title',         Request::getString('title',       '', 'POST'));
+    $gallery->setVar('description',   Request::getString('description', '', 'POST'));
+    $gallery->setVar('image_order',   Request::getInt('image_order',    0,  'POST'));
+    $gallery->setVar('image_status',  Request::getInt('image_status',   1,  'POST'));
     $gallery->setVar('uid',           (int)$GLOBALS['xoopsUser']->getVar('uid'));
 
     // Harici URL kontrolü
-    $imageUrl = xpages_normalize_url($_POST['image_url'] ?? '');
+    $imageUrl = xpages_normalize_url(Request::getString('image_url', '', 'POST'));
     if (!empty($imageUrl)) {
         $gallery->setVar('image_url', $imageUrl);
         $gallery->setVar('image_path', '');
@@ -140,25 +143,17 @@ if ($op === 'save') {
         redirect_header('gallery.php?page_id=' . $pageId, 2, _AM_XPAGES_GALLERY_SAVED);
         exit;
     }
-    echo '<div style="background:#f8d7da;color:#721c24;padding:11px;margin-bottom:14px;border-radius:5px">' . _AM_XPAGES_GALLERY_SAVE_ERROR . '</div>';
+    echo '<div class="xp-alert xp-alert--error">' . _AM_XPAGES_GALLERY_SAVE_ERROR . '</div>';
 }
 
 // ── Ekle / Düzenle Formu ──────────────────────────────────────────────────────
 if (in_array($op, ['add', 'edit'], true)) {
     $gallery = ($op === 'edit' && $galleryId) ? $galleryHandler->get($galleryId) : $galleryHandler->create();
     ?>
-<style>
-.xpf-form-table{width:100%;border-collapse:collapse}
-.xpf-form-table tr{border-bottom:1px solid #dee2e6}
-.xpf-form-table td{padding:11px 12px;font-size:13px;vertical-align:top}
-.xpf-form-table td:first-child{width:30%;font-weight:600}
-.xpf-form-table input[type=text],.xpf-form-table input[type=number],
-.xpf-form-table select,.xpf-form-table textarea{width:100%;padding:6px 8px;border:1px solid #ced4da;border-radius:4px}
-.image-preview{max-width:200px;max-height:200px;margin-top:8px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-</style>
+<?php // (inline <style> block extracted to assets/css/admin.css) ?>
 
-<div style="background:#fff;padding:22px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07)">
-<h3 style="margin:0 0 18px"><?= $op === 'edit' ? _AM_XPAGES_GALLERY_EDIT : _AM_XPAGES_GALLERY_NEW ?></h3>
+<div class="xp-form-card">
+<h3><?= $op === 'edit' ? _AM_XPAGES_GALLERY_EDIT : _AM_XPAGES_GALLERY_NEW ?></h3>
 <form method="post" action="gallery.php" enctype="multipart/form-data">
 <input type="hidden" name="op" value="save">
 <input type="hidden" name="page_id" value="<?= $pageId ?>">
@@ -197,7 +192,7 @@ if (in_array($op, ['add', 'edit'], true)) {
     </tr>
     <tr>
         <td><label><?= _AM_XPAGES_GALLERY_IMG_ORDER ?></label></td>
-        <td><input type="number" name="image_order" value="<?= (int)$gallery->getVar('image_order') ?>" min="0" style="width:100px"></td>
+        <td><input type="number" name="image_order" value="<?= (int)$gallery->getVar('image_order') ?>" min="0" class="xp-input-small"></td>
     </tr>
     <tr>
         <td><label><?= _AM_XPAGES_GALLERY_IMG_STATUS ?></label></td>
@@ -210,8 +205,8 @@ if (in_array($op, ['add', 'edit'], true)) {
     </tr>
 </table>
 <br>
-<button type="submit" style="background:#28a745;color:#fff;border:none;padding:8px 22px;border-radius:5px"><?= _AM_XPAGES_SAVE ?></button>
-<a href="gallery.php?page_id=<?= $pageId ?>" style="margin-left:12px;color:#6c757d"><?= _AM_XPAGES_CANCEL ?></a>
+<button type="submit" class="xp-btn xp-btn--add"><?= _AM_XPAGES_SAVE ?></button>
+<a href="gallery.php?page_id=<?= $pageId ?>" class="xp-cancel-link"><?= _AM_XPAGES_CANCEL ?></a>
 </form>
 </div>
     <?php
@@ -222,38 +217,38 @@ if (in_array($op, ['add', 'edit'], true)) {
 // ── Galeri Listesi ────────────────────────────────────────────────────────────
 $gallery = $galleryHandler->getGalleryForPage($pageId, false);
 
-echo '<p><a href="gallery.php?op=add&page_id=' . $pageId . '" style="background:#28a745;color:#fff;padding:8px 16px;text-decoration:none;border-radius:6px">' . _AM_XPAGES_GALLERY_ADD . '</a></p>';
+echo '<p><a href="gallery.php?op=add&page_id=' . $pageId . '" class="xp-btn xp-btn--add">' . _AM_XPAGES_GALLERY_ADD . '</a></p>';
 
 if (empty($gallery)) {
-    echo '<div style="background:#fff;padding:40px;border-radius:12px;text-align:center">';
-    echo '<div style="font-size:46px;margin-bottom:10px">🖼️</div>';
-    echo '<div style="font-size:17px;color:#6b7280">' . _AM_XPAGES_GALLERY_EMPTY . '</div>';
-    echo '<a href="gallery.php?op=add&page_id=' . $pageId . '" style="display:inline-block;margin-top:16px;background:#007bff;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none">' . _AM_XPAGES_GALLERY_ADD_FIRST . '</a>';
+    echo '<div class="xp-empty">';
+    echo '<div class="xp-empty-icon">🖼️</div>';
+    echo '<div class="xp-empty-text">' . _AM_XPAGES_GALLERY_EMPTY . '</div>';
+    echo '<a href="gallery.php?op=add&page_id=' . $pageId . '" class="xp-empty-cta xp-empty-cta--blue">' . _AM_XPAGES_GALLERY_ADD_FIRST . '</a>';
     echo '</div>';
     xoops_cp_footer();
     exit;
 }
 
-echo '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:20px">';
+echo '<div class="xpages-gallery-grid">';
 
 foreach ($gallery as $item) {
     $imageUrl = $item->getImageUrl();
-    echo '<div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)">';
-    echo '<div style="height:200px;overflow:hidden;background:#f0f0f0;display:flex;align-items:center;justify-content:center">';
+    echo '<div class="xpages-gallery-card">';
+    echo '<div class="xpages-gallery-card-img">';
     if ($imageUrl) {
-        echo '<img src="' . $imageUrl . '" style="width:100%;height:100%;object-fit:cover">';
+        echo '<img src="' . htmlspecialchars($imageUrl, ENT_QUOTES) . '" alt="">';
     } else {
-        echo '<div style="font-size:48px">🖼️</div>';
+        echo '<div class="xpages-gallery-card-img-placeholder">🖼️</div>';
     }
     echo '</div>';
-    echo '<div style="padding:12px">';
-    echo '<h4 style="margin:0 0 5px">' . htmlspecialchars((string)$item->getVar('title'), ENT_QUOTES) . '</h4>';
-    echo '<p style="margin:0 0 10px;font-size:12px;color:#6c757d">' . htmlspecialchars((string)$item->getVar('description'), ENT_QUOTES) . '</p>';
-    echo '<div style="display:flex;gap:10px;justify-content:space-between;align-items:center">';
+    echo '<div class="xpages-gallery-card-body">';
+    echo '<h4>' . htmlspecialchars((string)$item->getVar('title'), ENT_QUOTES) . '</h4>';
+    echo '<p class="xpages-gallery-card-desc">' . htmlspecialchars((string)$item->getVar('description'), ENT_QUOTES) . '</p>';
+    echo '<div class="xpages-gallery-card-footer">';
     echo '<small>' . sprintf(_AM_XPAGES_GALLERY_ORDER_STATUS, (int)$item->getVar('image_order')) . ($item->getVar('image_status') ? _AM_XPAGES_STATUS_ACTIVE : _AM_XPAGES_STATUS_INACTIVE) . '</small>';
-    echo '<div>';
-    echo '<a href="gallery.php?op=edit&gallery_id=' . $item->getVar('gallery_id') . '&page_id=' . $pageId . '" style="color:#007bff;margin-right:10px">✏️</a>';
-    echo '<a href="gallery.php?op=delete&gallery_id=' . $item->getVar('gallery_id') . '&page_id=' . $pageId . '" style="color:#dc3545">🗑️</a>';
+    echo '<div class="xp-actions">';
+    echo '<a href="gallery.php?op=edit&gallery_id=' . $item->getVar('gallery_id') . '&page_id=' . $pageId . '" class="xp-action--edit">✏️</a>';
+    echo '<a href="gallery.php?op=delete&gallery_id=' . $item->getVar('gallery_id') . '&page_id=' . $pageId . '" class="xp-action--delete">🗑️</a>';
     echo '</div></div></div></div>';
 }
 
