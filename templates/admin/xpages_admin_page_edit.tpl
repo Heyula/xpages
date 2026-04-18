@@ -57,8 +57,8 @@
             <textarea name="short_desc" rows="3"><{$page.short_desc|escape}></textarea>
         </div>
         <div class="xpages-field">
-            <label><{$label_body}></label>
-            <textarea name="body" rows="16"><{$page.body|escape}></textarea>
+        	<label><{$label_body}></label>
+        	<{$editor_html nofilter}>
         </div>
         <div class="xp-row">
             <div class="xpages-field">
