@@ -210,6 +210,44 @@ foreach ($extraFields as $field) {
     }
 }
 
+// ── XOOPS Editörünü oluştur (Otomatik seçim) ─────────────────────────────────
+$editorHtml = '';
+$bodyContent = (string)$page->getVar('body', 'n');
+
+if (file_exists(XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php')) {
+    require_once XOOPS_ROOT_PATH . '/class/xoopseditor/xoopseditor.php';
+    
+    if (class_exists('XoopsEditorHandler')) {
+        $editorHandler = XoopsEditorHandler::getInstance();
+        $editors = $editorHandler->getList();
+        
+        // Kullanılabilir editörleri sırayla dene
+        $editorTypes = ['tinymce', 'tinymce7', 'ckeditor', 'dhtml', 'textarea'];
+        
+        foreach ($editorTypes as $editorType) {
+            if (isset($editors[$editorType])) {
+                $editor = $editorHandler->get($editorType, [
+                    'name' => 'body',
+                    'value' => $bodyContent,
+                    'rows' => 25,
+                    'cols' => '100%',
+                    'width' => '100%',
+                    'height' => '400px'
+                ]);
+                if ($editor && method_exists($editor, 'render')) {
+                    $editorHtml = $editor->render();
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Hiçbir editör yoksa normal textarea kullan
+if (empty($editorHtml)) {
+    $editorHtml = '<textarea name="body" id="body" rows="25" style="width:100%;font-family:monospace">' . htmlspecialchars($bodyContent, ENT_QUOTES) . '</textarea>';
+}
+
 xpages_admin_render('xpages_admin_page_edit.tpl', [
     'form_title'                   => $pageId ? _AM_XPAGES_EDIT_PAGE : _AM_XPAGES_ADD_PAGE,
     'page_id'                      => $pageId,
@@ -217,7 +255,6 @@ xpages_admin_render('xpages_admin_page_edit.tpl', [
         'title'         => (string)$page->getVar('title',         'n'),
         'alias'         => (string)$page->getVar('alias',         'n'),
         'short_desc'    => (string)$page->getVar('short_desc',    'n'),
-        'body'          => (string)$page->getVar('body',          'n'),
         'status'        => (int)   $page->getVar('page_status'),
         'menu_order'    => (int)   $page->getVar('menu_order'),
         'show_in_menu'  => (bool)  $page->getVar('show_in_menu'),
@@ -232,6 +269,7 @@ xpages_admin_render('xpages_admin_page_edit.tpl', [
         'header_code'   => (string)$page->getVar('header_code',   'n'),
         'footer_code'   => (string)$page->getVar('footer_code',   'n'),
     ],
+    'editor_html'                  => $editorHtml,   // BU SATIRI EKLEYİN
     'parent_options'               => $parentOptions,
     'can_use_advanced_code'        => $canUseAdvancedCode,
     'has_extra_fields'             => (count($extraFieldRows) > 0),
