@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — Bloklar
  * @package  xpages
@@ -14,8 +17,8 @@ xpages_load_language('admin');
 
 function xpages_block_recent(array $options): array
 {
-    $limit     = isset($options[0]) ? (int)$options[0] : 5;
-    $showDesc  = isset($options[1]) ? (int)$options[1] : 1;
+    $limit    = (int)($options[0] ?? 5);
+    $showDesc = (int)($options[1] ?? 1);
 
     $pageHandler = xpages_get_handler('page');
     if (!$pageHandler) {
@@ -47,8 +50,8 @@ function xpages_block_recent(array $options): array
 
 function xpages_block_recent_edit(array $options): string
 {
-    $limit    = isset($options[0]) ? (int)$options[0] : 5;
-    $showDesc = isset($options[1]) ? (int)$options[1] : 1;
+    $limit    = (int)($options[0] ?? 5);
+    $showDesc = (int)($options[1] ?? 1);
 
     $form  = '<label>' . _AM_XPAGES_BLOCK_LIMIT_LABEL . ' ';
     $form .= '<input type="number" name="options[0]" value="' . $limit . '" min="1" max="50" size="3"></label><br>';

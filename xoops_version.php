@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages - Static Pages Module for XOOPS 2.7.0
  * @package    xpages
@@ -8,6 +11,8 @@
  */
 
 defined('XOOPS_ROOT_PATH') || die('XOOPS root path not defined');
+
+require_once __DIR__ . '/preloads/autoloader.php';
 
 $modversion = [];
 
@@ -70,6 +75,7 @@ $modversion['templates'][1]  = ['file' => 'xpages_index.tpl',        'descriptio
 $modversion['templates'][2]  = ['file' => 'xpages_page.tpl',         'description' => ''];
 $modversion['templates'][3]  = ['file' => 'xpages_block_recent.tpl', 'description' => ''];
 $modversion['templates'][4]  = ['file' => 'xpages_block_menu.tpl',   'description' => ''];
+$modversion['templates'][5]  = ['file' => 'xpages_field_value.tpl',  'description' => 'Public display partial for one extra-field value (included by xpages_page.tpl)'];
 
 // ── Arama ─────────────────────────────────────────────────────────────────────
 $modversion['hasSearch']     = 1;
