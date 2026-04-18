@@ -145,6 +145,7 @@ class XpagesPageHandler extends XoopsPersistableObjectHandler
      */
     public function incrementHits($pageId) {
         $sql = "UPDATE {$this->table} SET hits = hits + 1 WHERE page_id = " . (int)$pageId;
-        return $this->db->queryF($sql);
+        // XOOPS 2.7: exec() for mutating statements (queryF is deprecated).
+        return $this->db->exec($sql);
     }
 }

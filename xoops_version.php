@@ -21,15 +21,16 @@ $modversion['license']         = 'GPL 2.0';
 $modversion['official']        = 0;
 $modversion['image']           = 'assets/images/logo.png';
 $modversion['dirname']         = 'xpages';
-$modversion['modactivate']     = 1;
-$modversion['moddeactivate']   = 1;
 $modversion['hasAdmin']        = 1;
 $modversion['adminindex']      = 'admin/index.php';
 $modversion['adminmenu']       = 'admin/menu.php';
 $modversion['system_menu']     = 1;
 $modversion['hasMain']         = 1;
-$modversion['mainfile']        = 'index.php';
-$modversion['sub']             = [];
+// Removed non-standard / no-op keys:
+//   $modversion['modactivate']   = 1  // must be a function name, not a bool
+//   $modversion['moddeactivate'] = 1  // must be a function name, not a bool
+//   $modversion['mainfile']      = 'index.php' // not a recognised XOOPS key
+//   $modversion['sub']           = []          // empty — only set when sub-menu items exist
 
 // ── Sayfalar tablosu ──────────────────────────────────────────────────────────
 $modversion['sqlfile']['mysql'] = 'sql/mysql.sql';

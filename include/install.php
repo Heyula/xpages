@@ -68,7 +68,8 @@ CREATE TABLE `xpages_gallery` (
 ) ENGINE=InnoDB
 SQL;
 
-    return (bool)$GLOBALS['xoopsDB']->queryF($sql);
+    // XOOPS 2.7: exec() for mutating statements (queryF is deprecated).
+    return (bool)$GLOBALS['xoopsDB']->exec($sql);
 }
 
 /**
