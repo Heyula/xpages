@@ -35,14 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
     registered by xpages_register_public_css() in page.php. *}>
 
 <{* Sayfa başı özel kod enjeksiyonu *}>
-<{if $xpages_header_code}>
+<{if $xpages_header_code|default:''}>
 <{$xpages_header_code nofilter}>
 <{/if}>
 
 <div id="xpages-page" class="xpages-page-wrap">
 
     <{* Breadcrumb *}>
-    <{if $xpages_show_breadcrumb}>
+    <{if $xpages_show_breadcrumb|default:false}>
     <nav class="xpages-breadcrumb" aria-label="breadcrumb">
         <a href="<{$xoops_url}>"><{$smarty.const._MD_XPAGES_HOME}></a>
         &rsaquo;
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <article class="xpages-article">
         <header class="xpages-article-header">
             <h1 class="xpages-title"><{$xpages_page.title}></h1>
-            <{if $xpages_show_lastmod && $xpages_page.update_date}>
+            <{if ($xpages_show_lastmod|default:false) && $xpages_page.update_date}>
             <div class="xpages-meta">
                 <{$smarty.const._MD_XPAGES_LAST_UPDATED}>
                 <time datetime="<{$xpages_page.update_date|date_format:"%Y-%m-%d"}>">
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </header>
 
         <{* Kısa açıklama (varsa) *}>
-        <{if $xpages_page.short_desc}>
+        <{if $xpages_page.short_desc|default:''}>
         <div class="xpages-short-desc">
             <{$xpages_page.short_desc}>
         </div>
@@ -79,40 +79,13 @@ document.addEventListener('DOMContentLoaded', function() {
             <{$xpages_page.body nofilter}>
         </div>
 
-		<{* ── İlave Alanlar (TAMAMEN YENİLENDİ) ─────────────────────────────────── *}>
-		<{if $xpages_page.extra_fields}>
+		<{* ── İlave Alanlar ──────────────────────────────────────────────────── *}>
+		<{if $xpages_page.extra_fields|default:[]}>
 		<section class="xpages-extra-fields">
 			<h3><{$smarty.const._MD_XPAGES_EXTRA_FIELDS}></h3>
 			<{foreach key=fid item=f from=$xpages_page.extra_fields_by_id}>
 				<{if $f.show_in_tpl && $f.value != ''}>
-				<div class="xpf xpf-<{$f.field_type}>" id="xpf-<{$fid}>">
-					<div class="xpf-label"><strong><{$f.field_label}>:</strong></div>
-					<div class="xpf-value">
-						<{if $f.field_type == 'file'}>
-							<{* Dosya/Resim gösterimi *}>
-							<{assign var="fileExt" value=$f.file_ext|lower}>
-							<{if $fileExt == 'jpg' || $fileExt == 'jpeg' || $fileExt == 'png' || $fileExt == 'gif' || $fileExt == 'webp'}>
-								<img src="<{$f.value|escape:'html'}>" alt="<{$f.field_label}>" class="xpf-file-image">
-							<{else}>
-								<a href="<{$f.value|escape:'html'}>" target="_blank" rel="noopener">📎 <{$smarty.const._MD_XPAGES_DOWNLOAD_FILE}></a>
-							<{/if}>
-						<{elseif $f.field_type == 'url'}>
-							<a href="<{$f.value|escape:'html'}>" target="_blank" rel="noopener"><{$f.value|escape:'html'}></a>
-						<{elseif $f.field_type == 'email'}>
-							<a href="mailto:<{$f.value|escape:'html'}>"><{$f.value|escape:'html'}></a>
-						<{elseif $f.field_type == 'checkbox'}>
-							<{if $f.value == 1 || $f.value == '1' || $f.value == 'on' || $f.value == 'yes'}>✓ <{$smarty.const._MD_XPAGES_YES}><{else}>✗ <{$smarty.const._MD_XPAGES_NO}><{/if}>
-						<{elseif $f.field_type == 'radio'}>
-							<span><{$f.value}></span>
-						<{elseif $f.field_type == 'select'}>
-							<span><{$f.value}></span>
-						<{elseif $f.field_type == 'textarea'}>
-							<div class="xpf-textarea-val"><{$f.value|nl2br nofilter}></div>
-						<{else}>
-							<span><{$f.value}></span>
-						<{/if}>
-					</div>
-				</div>
+					<{include file=$xpages_field_value_partial f=$f fid=$fid}>
 				<{/if}>
 			<{/foreach}>
 		</section>
@@ -120,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		
 <{* ── Galeri Bölümü (LightGallery ile) ──────────────────────────────────────── *}>
-<{if $xpages_gallery}>
+<{if $xpages_gallery|default:[]}>
 <section class="xpages-gallery">
     <div id="xpages-lightgallery" class="xpages-public-gallery">
         <{foreach item=g from=$xpages_gallery key=index}>
@@ -138,14 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
 </section>
 <{/if}>
 
-<hr>
-<{$xpages_page.extra_fields.metin_tek.value}>
-<hr>
-
     </article>
 
     <{* XOOPS yorumlar (etkinleştirildiyse) *}>
-    <{if $xpages_show_comments}>
+    <{if $xpages_show_comments|default:false}>
     <section class="xpages-comments">
         <{include file="db:system_comments.tpl"}>
     </section>
@@ -154,6 +123,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </div><!-- #xpages-page -->
 
 <{* Sayfa sonu özel kod enjeksiyonu *}>
-<{if $xpages_footer_code}>
+<{if $xpages_footer_code|default:''}>
 <{$xpages_footer_code nofilter}>
 <{/if}>
