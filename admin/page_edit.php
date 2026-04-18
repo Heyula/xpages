@@ -12,6 +12,7 @@ require_once XOOPS_ROOT_PATH . '/modules/xpages/include/functions.php';
 xpages_admin_boot();
 
 xoops_cp_header();
+xpages_admin_register_css();
 
 if (class_exists('Xmf\\Module\\Admin')) {
     \Xmf\Module\Admin::getInstance()->displayNavigation('page_edit.php');
@@ -194,32 +195,7 @@ $blockedParentIds = array_flip($descendantIds);
 
 <h3><?= $pageId ? _AM_XPAGES_EDIT_PAGE : _AM_XPAGES_ADD_PAGE ?></h3>
 
-<style>
-    /* Kill the <li>::marker bullets the admin theme re-applies on tab <li>
-       items. Parent `list-style:none` alone isn't enough — some admin CSS
-       resets set `::marker { content: '\2022'; }` on generic `li` selectors
-       which win over the parent's `list-style` shorthand. Belt-and-suspenders: */
-    .xp-tabs{display:flex;gap:3px;padding:0;margin:0 0 0;list-style:none;list-style-type:none;list-style-image:none;border-bottom:2px solid #4472c4}
-    .xp-tabs li{list-style:none;list-style-type:none;list-style-image:none}
-    .xp-tabs li::marker{content:'';display:none}
-    .xp-tabs li a{display:block;padding:7px 16px;background:#e8eef8;border:1px solid #b8c8e8;border-bottom:none;text-decoration:none;color:#333;border-radius:4px 4px 0 0;font-size:13px}
-    .xp-tabs li.active a{background:#4472c4;color:#fff;font-weight:600}
-    .xp-tab-pane{display:none;border:1px solid #4472c4;border-top:none;padding:18px;background:#fff;margin-bottom:20px}
-    .xp-tab-pane.active{display:block}
-    .xpages-field{margin-bottom:14px}
-    .xpages-field label{display:block;font-weight:600;margin-bottom:4px;font-size:13px}
-    .xpages-field input[type=text],.xpages-field input[type=url],
-    .xpages-field input[type=email],.xpages-field input[type=number],
-    .xpages-field select,.xpages-field textarea{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ced4da;border-radius:4px;font-size:13px}
-    .xpages-field .xpf-desc{color:#6c757d;font-size:12px;display:block;margin-top:3px}
-    .xpages-field .req{color:#dc3545}
-    .xp-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .formButton{background:#4472c4;color:#fff;border:none;padding:8px 22px;cursor:pointer;border-radius:5px;font-size:13px}
-    .formButton:hover{background:#3461b0}
-    .xpages-file-field{background:#f8f9fa;padding:10px;border-radius:6px;border:1px solid #dee2e6}
-    .xpages-current-file{background:#fff;padding:8px;border-radius:4px;margin-top:8px;font-size:12px}
-    .xpages-radio-group label{display:inline-block;margin-right:15px;font-weight:normal}
-</style>
+<?php // (inline <style> block extracted to assets/css/admin.css) ?>
 
 <form method="post" action="page_edit.php" enctype="multipart/form-data" id="xpages-edit-form">
     <input type="hidden" name="op" value="save">

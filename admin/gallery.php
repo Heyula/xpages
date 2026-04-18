@@ -12,6 +12,7 @@ require_once XOOPS_ROOT_PATH . '/modules/xpages/include/functions.php';
 xpages_admin_boot();
 
 xoops_cp_header();
+xpages_admin_register_css();
 
 if (class_exists('Xmf\\Module\\Admin')) {
     \Xmf\Module\Admin::getInstance()->displayNavigation('gallery.php');
@@ -149,15 +150,7 @@ if ($op === 'save') {
 if (in_array($op, ['add', 'edit'], true)) {
     $gallery = ($op === 'edit' && $galleryId) ? $galleryHandler->get($galleryId) : $galleryHandler->create();
     ?>
-<style>
-.xpf-form-table{width:100%;border-collapse:collapse}
-.xpf-form-table tr{border-bottom:1px solid #dee2e6}
-.xpf-form-table td{padding:11px 12px;font-size:13px;vertical-align:top}
-.xpf-form-table td:first-child{width:30%;font-weight:600}
-.xpf-form-table input[type=text],.xpf-form-table input[type=number],
-.xpf-form-table select,.xpf-form-table textarea{width:100%;padding:6px 8px;border:1px solid #ced4da;border-radius:4px}
-.image-preview{max-width:200px;max-height:200px;margin-top:8px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-</style>
+<?php // (inline <style> block extracted to assets/css/admin.css) ?>
 
 <div style="background:#fff;padding:22px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07)">
 <h3 style="margin:0 0 18px"><?= $op === 'edit' ? _AM_XPAGES_GALLERY_EDIT : _AM_XPAGES_GALLERY_NEW ?></h3>

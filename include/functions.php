@@ -53,6 +53,20 @@ function xpages_admin_boot() {
 }
 
 /**
+ * Register the module's admin stylesheet with the XOOPS admin theme.
+ *
+ * Must be called AFTER xoops_cp_header() because $GLOBALS['xoTheme'] is
+ * populated by that call. All admin controllers invoke this via the
+ * common bootstrap path: xpages_admin_boot() → xoops_cp_header() → this.
+ */
+function xpages_admin_register_css(): void {
+    if (!isset($GLOBALS['xoTheme']) || !is_object($GLOBALS['xoTheme'])) {
+        return;
+    }
+    $GLOBALS['xoTheme']->addStylesheet(XOOPS_URL . '/modules/xpages/assets/css/admin.css');
+}
+
+/**
  * Redirect any request that isn't from a user with admin rights
  * specifically for the xpages module. Call at the top of every admin
  * controller (done automatically via xpages_admin_boot()).

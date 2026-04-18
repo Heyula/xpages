@@ -12,6 +12,7 @@ require_once XOOPS_ROOT_PATH . '/modules/xpages/include/functions.php';
 xpages_admin_boot();
 
 xoops_cp_header();
+xpages_admin_register_css();
 
 if (class_exists('Xmf\\Module\\Admin')) {
     \Xmf\Module\Admin::getInstance()->displayNavigation('fields.php');
@@ -193,18 +194,7 @@ if (in_array($op, ['add', 'edit'], true)) {
     // Mevcut options değerini olduğu gibi göster (nl2br kullanma!)
     $currentOptions = (string)$field->getVar('field_options', 'n');
     ?>
-<style>
-.xpf-form-table{width:100%;border-collapse:collapse}
-.xpf-form-table tr{border-bottom:1px solid #dee2e6}
-.xpf-form-table tr:last-child{border-bottom:none}
-.xpf-form-table td{padding:11px 12px;font-size:13px;vertical-align:top}
-.xpf-form-table td:first-child{width:32%;font-weight:600;color:#374151}
-.xpf-form-table input[type=text],.xpf-form-table input[type=number],
-.xpf-form-table select,.xpf-form-table textarea{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ced4da;border-radius:4px;font-size:13px}
-.xpf-desc{color:#6c757d;font-size:11px;display:block;margin-top:3px}
-.xpf-preview{max-width:100px;max-height:100px;margin-top:8px;border-radius:6px;border:1px solid #dee2e6}
-.xpf-options-help{background:#e8f4f8;padding:10px;border-radius:5px;margin-top:8px;font-size:12px}
-</style>
+<?php // (inline <style> block extracted to assets/css/admin.css) ?>
 
 <div style="background:#fff;padding:22px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-top:16px">
 <h3 style="margin:0 0 18px;font-size:16px"><?= $op === 'edit' ? _AM_XPAGES_EDIT_FIELD : _AM_XPAGES_ADD_FIELD ?></h3>

@@ -1,0 +1,322 @@
+/*!
+ * xPages — Admin stylesheet
+ * Loaded by xpages_admin_register_css() from every admin controller via the
+ * xoTheme->addStylesheet() hook. All admin-side CSS lives here; individual
+ * PHP files must NOT emit inline <style> blocks or style="…" attributes.
+ *
+ * Class naming: .xp- prefix for layout primitives (tabs, rows, warnings),
+ *               .xpages- prefix for module-scoped widgets (fields, stat cards).
+ */
+
+/* ==========================================================================
+   Tab navigation (page_edit.php)
+   -------------------------------------------------------------------------
+   Kill the <li>::marker bullets the admin theme re-applies on tab <li>
+   items. Parent `list-style:none` alone isn't enough — some admin CSS
+   resets set `::marker { content: '\2022'; }` on generic `li` selectors
+   which win over the parent's `list-style` shorthand.
+   ========================================================================== */
+.xp-tabs {
+    display: flex;
+    gap: 3px;
+    padding: 0;
+    margin: 0 0 0;
+    list-style: none;
+    list-style-type: none;
+    list-style-image: none;
+    border-bottom: 2px solid #4472c4;
+}
+.xp-tabs li {
+    list-style: none;
+    list-style-type: none;
+    list-style-image: none;
+}
+.xp-tabs li::marker {
+    content: '';
+    display: none;
+}
+.xp-tabs li a {
+    display: block;
+    padding: 7px 16px;
+    background: #e8eef8;
+    border: 1px solid #b8c8e8;
+    border-bottom: none;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px 4px 0 0;
+    font-size: 13px;
+}
+.xp-tabs li.active a {
+    background: #4472c4;
+    color: #fff;
+    font-weight: 600;
+}
+
+.xp-tab-pane {
+    display: none;
+    border: 1px solid #4472c4;
+    border-top: none;
+    padding: 18px;
+    background: #fff;
+    margin-bottom: 20px;
+}
+.xp-tab-pane.active {
+    display: block;
+}
+
+/* ==========================================================================
+   Generic field rows (page_edit.php "General" tab, everywhere else)
+   ========================================================================== */
+.xpages-field {
+    margin-bottom: 14px;
+}
+.xpages-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+.xpages-field input[type=text],
+.xpages-field input[type=url],
+.xpages-field input[type=email],
+.xpages-field input[type=number],
+.xpages-field select,
+.xpages-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+}
+.xpages-field .xpf-desc,
+.xpf-desc {
+    color: #6c757d;
+    font-size: 12px;
+    display: block;
+    margin-top: 3px;
+}
+.xpages-field .req,
+.req {
+    color: #dc3545;
+}
+.xp-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* Submit button (form default) */
+.formButton {
+    background: #4472c4;
+    color: #fff;
+    border: none;
+    padding: 8px 22px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 13px;
+}
+.formButton:hover {
+    background: #3461b0;
+}
+
+/* File field wrapper */
+.xpages-file-field {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+.xpages-current-file {
+    background: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+.xpages-radio-group label {
+    display: inline-block;
+    margin-right: 15px;
+    font-weight: normal;
+}
+
+/* ==========================================================================
+   Advanced-code warning (page_edit.php — header_code/footer_code)
+   ========================================================================== */
+.xp-adv-warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-left: 4px solid #dc3545;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #3b2b00;
+}
+
+/* ==========================================================================
+   Field form table (fields.php + gallery.php edit forms)
+   ========================================================================== */
+.xpf-form-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.xpf-form-table tr {
+    border-bottom: 1px solid #dee2e6;
+}
+.xpf-form-table tr:last-child {
+    border-bottom: none;
+}
+.xpf-form-table td {
+    padding: 11px 12px;
+    font-size: 13px;
+    vertical-align: top;
+}
+.xpf-form-table td:first-child {
+    width: 32%;
+    font-weight: 600;
+    color: #374151;
+}
+.xpf-form-table input[type=text],
+.xpf-form-table input[type=number],
+.xpf-form-table select,
+.xpf-form-table textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.xpf-preview {
+    max-width: 100px;
+    max-height: 100px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+.xpf-options-help {
+    background: #e8f4f8;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+/* Gallery image preview (200px — bigger than the generic one) */
+.image-preview {
+    max-width: 200px;
+    max-height: 200px;
+    margin-top: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   Dashboard widgets (admin/index.php + admin/dashboard_widgets.php)
+   ========================================================================== */
+.xpages-widget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+.xpages-widget {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    overflow: hidden;
+}
+.xpages-widget-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    padding: 12px 18px;
+    font-weight: 600;
+    font-size: 14px;
+}
+.xpages-widget-content {
+    padding: 15px;
+}
+
+.xpages-stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.xpages-stat-card {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+}
+.xpages-stat-card h3 {
+    margin: 0 0 5px;
+    font-size: 28px;
+}
+.xpages-stat-card p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.xpages-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.xpages-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.xpages-list li:last-child {
+    border-bottom: none;
+}
+.xpages-list a {
+    color: #333;
+    text-decoration: none;
+}
+.xpages-list a:hover {
+    color: #007bff;
+}
+
+.xpages-badge {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.xpages-chart {
+    margin-top: 15px;
+}
+.xpages-chart-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+.xpages-chart-bar-label {
+    width: 60px;
+    color: #6c757d;
+}
+.xpages-chart-bar-fill {
+    flex: 1;
+    height: 25px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    color: #fff;
+    font-size: 11px;
+    min-width: 30px;
+}

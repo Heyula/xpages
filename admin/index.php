@@ -10,6 +10,7 @@ require_once XOOPS_ROOT_PATH . '/modules/xpages/include/functions.php';
 xpages_admin_boot();
 
 xoops_cp_header();
+xpages_admin_register_css();
 
 if (class_exists('Xmf\\Module\\Admin')) {
     $adminObject = \Xmf\Module\Admin::getInstance();
