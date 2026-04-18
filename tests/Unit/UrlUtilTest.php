@@ -64,19 +64,21 @@ final class UrlUtilTest extends TestCase
         yield 'url prefix'              => ['http://x/up/photo.jpg', 'photo.jpg'];
         yield 'backslash path'          => ['a\\b\\c.png',           'c.png'];
         yield 'traversal literal'       => ['../../etc/passwd',      'passwd'];
-        // Function doesn't urldecode before basename(); %-chars are stripped by
-        // the alphanum allowlist but dots survive so the leading ".." isn't
-        // caught by the exact-string ".." reject either.
-        yield 'traversal encoded'       => ['..%2f..%2fpasswd',      '..2f..2fpasswd'];
+        // rawurldecode() runs before basename() so %-encoded traversal
+        // collapses to real slashes, which basename() then consumes.
+        yield 'traversal encoded'       => ['..%2f..%2fpasswd',      'passwd'];
+        // Mixed-case %2F decodes to "/" the same as lowercase %2f.
+        yield 'traversal encoded case'  => ['..%2F..%2Fpasswd',      'passwd'];
         yield 'dot-only reject'         => ['.',                     ''];
         yield 'double-dot reject'       => ['..',                    ''];
         yield 'empty reject'            => ['',                      ''];
         yield 'whitespace reject'       => ['   ',                   ''];
         yield 'non-ascii stripped'      => ['café.jpg',              'caf.jpg'];
-        // Leading-dot files pass through. Stripping them would be a hardening
-        // improvement (see ~/.claude/CLAUDE.md "Filename sanitization"), but
-        // the current behaviour is what this test locks in.
-        yield 'dotfile passthrough'     => ['.htaccess',             '.htaccess'];
+        // Leading dots are stripped so dotfiles (.htaccess, .env, .git)
+        // become their non-dot tail; an all-dot name rejects to empty.
+        yield 'htaccess-style'          => ['.htaccess',             'htaccess'];
+        yield 'env dotfile'             => ['.env',                  'env'];
+        yield 'multi-dot prefix'        => ['...secret',             'secret'];
     }
 
     #[DataProvider('safeFilenameCases')]
