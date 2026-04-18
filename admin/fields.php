@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — Admin ilave alanlar yönetimi (Dosya/Resim desteği eklendi)
  * @package  xpages
@@ -23,7 +26,7 @@ $pageHandler  = xpages_get_handler('page');
 $valueHandler = xpages_get_handler('fieldvalue');
 
 if (!$fieldHandler || !$pageHandler || !$valueHandler) {
-    echo '<div class="xp-alert xp-alert--error">xPages handler unavailable.</div>';
+    echo '<div class="xp-alert xp-alert--error">' . _AM_XPAGES_HANDLER_UNAVAILABLE . '</div>';
     xoops_cp_footer();
     exit;
 }
@@ -181,7 +184,7 @@ if ($op === 'save') {
 // ── Ekle / Düzenle Formu ──────────────────────────────────────────────────────
 if (in_array($op, ['add', 'edit'], true)) {
     $field      = ($op === 'edit' && $fieldId) ? $fieldHandler->get($fieldId) : $fieldHandler->create();
-    $typeLabels = XpagesField::getTypeLabels();
+    $typeLabels = \XoopsModules\Xpages\Field::getTypeLabels();
     $typeLabels['file'] = _AM_XPAGES_FIELD_TYPE_FILE_IMG;
     $selectedType = (string)$field->getVar('field_type', 'n');
 
@@ -266,7 +269,7 @@ if (in_array($op, ['add', 'edit'], true)) {
 // ── Alan Listesi ──────────────────────────────────────────────────────────────
 $fields = $pageId ? $fieldHandler->getFieldsForPage($pageId, false) : $fieldHandler->getGlobalFields(false);
 
-$typeLabels = XpagesField::getTypeLabels();
+$typeLabels = \XoopsModules\Xpages\Field::getTypeLabels();
 $typeLabels['file'] = _AM_XPAGES_FIELD_TYPE_FILE_IMG;
 
 // Flatten XoopsObject list into template-ready row descriptors.

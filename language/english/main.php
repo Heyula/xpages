@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — English language file (front-end)
  * @package  xpages

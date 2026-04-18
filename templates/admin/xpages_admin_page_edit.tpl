@@ -32,12 +32,14 @@
     <input type="hidden" name="page_id" value="<{$page_id}>">
     <{$xoops_token_html nofilter}>
 
+    <{* Tab behaviour is delegated from assets/js/admin.js — no inline
+        onclick handlers. The <a href="#tab-X"> is the source of truth. *}>
     <ul class="xp-tabs" id="xpTabList">
-        <li class="active"><a href="#tab-main" onclick="xpShowTab(this,'tab-main');return false"><{$label_tab_main}></a></li>
-        <li><a href="#tab-seo"  onclick="xpShowTab(this,'tab-seo');return false"><{$label_tab_seo}></a></li>
-        <li><a href="#tab-adv"  onclick="xpShowTab(this,'tab-adv');return false"><{$label_tab_advanced}></a></li>
+        <li class="active"><a href="#tab-main"><{$label_tab_main}></a></li>
+        <li><a href="#tab-seo"><{$label_tab_seo}></a></li>
+        <li><a href="#tab-adv"><{$label_tab_advanced}></a></li>
         <{if $has_extra_fields}>
-            <li><a href="#tab-extra" onclick="xpShowTab(this,'tab-extra');return false"><{$label_tab_extra}></a></li>
+            <li><a href="#tab-extra"><{$label_tab_extra}></a></li>
         <{/if}>
     </ul>
 
@@ -179,12 +181,3 @@
     <input type="submit" value="<{$label_save|escape}>" class="formButton">
     <a href="pages.php" class="xp-cancel-link"><{$label_cancel}></a>
 </form>
-
-<script>
-function xpShowTab(el, id) {
-    document.querySelectorAll('.xp-tab-pane').forEach(function (p) { p.classList.remove('active'); });
-    document.querySelectorAll('#xpTabList li').forEach(function (l) { l.classList.remove('active'); });
-    document.getElementById(id).classList.add('active');
-    el.parentElement.classList.add('active');
-}
-</script>

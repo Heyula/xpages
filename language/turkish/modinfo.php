@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — Türkçe dil dosyası (modinfo)
  * @package  xpages

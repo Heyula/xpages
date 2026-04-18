@@ -1,64 +1,56 @@
 <?php
+
+declare(strict_types=1);
+
+namespace XoopsModules\Xpages;
+
 /**
- * xPages — Field Value Class
+ * xPages — Field-value handler.
+ *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesFieldvalue extends XoopsObject
+class FieldvalueHandler extends \XoopsPersistableObjectHandler
 {
-    public function __construct()
+    public function __construct(\XoopsDatabase $db)
     {
-        $this->initVar('value_id',    XOBJ_DTYPE_INT,    null, false);
-        $this->initVar('page_id',     XOBJ_DTYPE_INT,    0,    false);
-        $this->initVar('field_id',    XOBJ_DTYPE_INT,    0,    false);
-        $this->initVar('field_value', XOBJ_DTYPE_TXTAREA, '',   false);
+        parent::__construct($db, 'xpages_field_values', Fieldvalue::class, 'value_id', 'field_value');
     }
-}
 
-class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
-{
-    public function __construct($db)
-    {
-        parent::__construct($db, 'xpages_field_values', 'XpagesFieldvalue', 'value_id', 'field_value');
-    }
-    
-    /**
-     * Toplam kayıt sayısını döndür
-     */
-    public function getCount($criteria = null) {
-        return parent::getCount($criteria);
-    }
-    
     /**
      * Sayfaya ait tüm alan değerlerini getir
+     *
+     * @return array<int,string> field_id => field_value
      */
-    public function getValuesForPage($pageId) {
-        $values = [];
-        $criteria = new Criteria('page_id', $pageId);
-        $objects = $this->getObjects($criteria);
-        
-        foreach ($objects as $obj) {
-            $values[(int)$obj->getVar('field_id')] = $obj->getVar('field_value');
+    public function getValuesForPage(int $pageId): array
+    {
+        $values   = [];
+        $criteria = new \Criteria('page_id', $pageId);
+        $objects  = $this->getObjects($criteria);
+
+        foreach ($objects ?: [] as $obj) {
+            $values[(int)$obj->getVar('field_id')] = (string)$obj->getVar('field_value');
         }
-        
+
         return $values;
     }
-    
 
-/**
- * Sayfa için alan değerlerini kaydet (TAMAMEN YENİLENDİ)
- */
-    public function saveValuesForPage($pageId, $values) {
-        if (!$pageId || !is_array($values)) return false;
+    /**
+     * Sayfa için alan değerlerini kaydet
+     */
+    public function saveValuesForPage(int $pageId, array $values): bool
+    {
+        if ($pageId <= 0) {
+            return false;
+        }
 
         $fieldHandler = xpages_get_handler('field');
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
+        $uploadDir    = XOOPS_UPLOAD_PATH . '/xpages/';
 
         foreach ($values as $fieldId => $value) {
-            $fieldId = (int)$fieldId;
-            $field = $fieldHandler ? $fieldHandler->get($fieldId) : null;
-            $fieldType = $field ? (string)$field->getVar('field_type', 'n') : '';
+            $fieldId    = (int)$fieldId;
+            $field      = $fieldHandler ? $fieldHandler->get($fieldId) : null;
+            $fieldType  = $field ? (string)$field->getVar('field_type', 'n') : '';
             $cleanValue = (string)$value;
 
             if ($fieldType === 'file') {
@@ -70,13 +62,13 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
                 $cleanValue = filter_var($cleanValue, FILTER_VALIDATE_EMAIL) ? $cleanValue : '';
             }
 
-            $criteria = new CriteriaCompo();
-            $criteria->add(new Criteria('page_id', $pageId));
-            $criteria->add(new Criteria('field_id', $fieldId));
+            $criteria = new \CriteriaCompo();
+            $criteria->add(new \Criteria('page_id', $pageId));
+            $criteria->add(new \Criteria('field_id', $fieldId));
 
-            $existing = $this->getObjects($criteria);
+            $existing   = $this->getObjects($criteria);
             $fieldValue = !empty($existing) ? $existing[0] : $this->create();
-            $oldValue = !empty($existing) ? (string)$fieldValue->getVar('field_value', 'n') : '';
+            $oldValue   = !empty($existing) ? (string)$fieldValue->getVar('field_value', 'n') : '';
 
             if ($cleanValue !== '' || $cleanValue === '0') {
                 if ($fieldType === 'file' && $oldValue !== '' && $oldValue !== $cleanValue) {
@@ -104,19 +96,20 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
 
         return true;
     }
-    
+
     /**
      * Sayfaya ait tüm alan değerlerini sil
      */
-    public function deleteValuesForPage($pageId) {
-        $criteria = new Criteria('page_id', $pageId);
-        $values = $this->getObjects($criteria) ?: [];
+    public function deleteValuesForPage(int $pageId): bool
+    {
+        $criteria     = new \Criteria('page_id', $pageId);
+        $values       = $this->getObjects($criteria) ?: [];
         $fieldHandler = xpages_get_handler('field');
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
+        $uploadDir    = XOOPS_UPLOAD_PATH . '/xpages/';
 
         foreach ($values as $value) {
             $fieldId = (int)$value->getVar('field_id');
-            $field = $fieldHandler ? $fieldHandler->get($fieldId) : null;
+            $field   = $fieldHandler ? $fieldHandler->get($fieldId) : null;
             if ($field && $field->getVar('field_type') === 'file' && !empty($value->getVar('field_value'))) {
                 $oldFile = xpages_safe_filename($value->getVar('field_value', 'n'));
                 if ($oldFile !== '' && file_exists($uploadDir . $oldFile)) {
@@ -131,12 +124,13 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
     /**
      * Belirli bir alanın tüm değerlerini sil
      */
-    public function deleteValuesForField($fieldId) {
-        $criteria = new Criteria('field_id', (int)$fieldId);
-        $values = $this->getObjects($criteria) ?: [];
+    public function deleteValuesForField(int $fieldId): bool
+    {
+        $criteria     = new \Criteria('field_id', $fieldId);
+        $values       = $this->getObjects($criteria) ?: [];
         $fieldHandler = xpages_get_handler('field');
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
-        $field = $fieldHandler ? $fieldHandler->get((int)$fieldId) : null;
+        $uploadDir    = XOOPS_UPLOAD_PATH . '/xpages/';
+        $field        = $fieldHandler ? $fieldHandler->get($fieldId) : null;
 
         foreach ($values as $value) {
             if ($field && $field->getVar('field_type') === 'file' && !empty($value->getVar('field_value'))) {

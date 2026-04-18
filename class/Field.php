@@ -1,11 +1,19 @@
 <?php
+
+declare(strict_types=1);
+
+namespace XoopsModules\Xpages;
+
 /**
- * xPages — Field Class
+ * xPages — Field value object.
+ *
+ * Namespaced M10 rewrite. The handler is in FieldHandler.php and is
+ * loaded on demand via the preloads/autoloader.
+ *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesField extends XoopsObject
+class Field extends \XoopsObject
 {
     public function __construct()
     {
@@ -22,11 +30,14 @@ class XpagesField extends XoopsObject
         $this->initVar('field_default',  XOBJ_DTYPE_TXTAREA, '',  false);
         $this->initVar('show_in_tpl',    XOBJ_DTYPE_INT,    1,    false);
     }
-    
+
     /**
      * Alan tipi etiketlerini döndür
+     *
+     * @return array<string,string>
      */
-    public static function getTypeLabels() {
+    public static function getTypeLabels(): array
+    {
         return [
             'text'     => defined('_AM_XPAGES_FIELD_TYPE_TEXT') ? '📝 ' . _AM_XPAGES_FIELD_TYPE_TEXT : '📝 Text',
             'textarea' => defined('_AM_XPAGES_FIELD_TYPE_TEXTAREA') ? '📄 ' . _AM_XPAGES_FIELD_TYPE_TEXTAREA : '📄 Text Area',
@@ -39,59 +50,5 @@ class XpagesField extends XoopsObject
             'select'   => defined('_AM_XPAGES_FIELD_TYPE_SELECT') ? '📋 ' . _AM_XPAGES_FIELD_TYPE_SELECT : '📋 Select Box',
             'file'     => defined('_AM_XPAGES_FIELD_TYPE_FILE_IMG') ? '📎 ' . _AM_XPAGES_FIELD_TYPE_FILE_IMG : '📎 File/Image',
         ];
-    }
-}
-
-class XpagesFieldHandler extends XoopsPersistableObjectHandler
-{
-    public function __construct($db)
-    {
-        parent::__construct($db, 'xpages_fields', 'XpagesField', 'field_id', 'field_name');
-    }
-    
-    /**
-     * Toplam kayıt sayısını döndür
-     */
-    public function getCount($criteria = null) {
-        return parent::getCount($criteria);
-    }
-    
-    /**
-     * Sayfaya ait alanları getir (DÜZELTİLDİ - CriteriaCompo kullanıldı)
-     */
-    public function getFieldsForPage($pageId, $onlyActive = true) {
-        $scope = new CriteriaCompo();
-        $scope->add(new Criteria('page_id', (int)$pageId));
-        $scope->add(new Criteria('page_id', 0), 'OR'); // Global alanlar için
-
-        $criteria = new CriteriaCompo();
-        $criteria->add($scope);
-        
-        if ($onlyActive) {
-            $criteria->add(new Criteria('field_status', 1));
-        }
-        $criteria->setSort('field_order');
-        $criteria->setOrder('ASC');
-        
-        return $this->getObjects($criteria);
-    }
-    
-    /**
-     * Global alanları getir
-     */
-    public function getGlobalFields($onlyActive = true) {
-        return $this->getFieldsForPage(0, $onlyActive);
-    }
-    
-    /**
-     * Alan adının var olup olmadığını kontrol et (DÜZELTİLDİ)
-     */
-    public function fieldNameExists($fieldName, $pageId, $excludeId = 0) {
-        $criteria = new CriteriaCompo();
-        $criteria->add(new Criteria('field_name', $fieldName));
-        if ($excludeId > 0) {
-            $criteria->add(new Criteria('field_id', $excludeId, '!='));
-        }
-        return $this->getCount($criteria) > 0;
     }
 }
