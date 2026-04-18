@@ -38,11 +38,41 @@ function xpages_get_handler($name) {
 }
 
 /**
- * Admin boot - dil dosyalarını yükle
+ * Admin boot — load language files + enforce module-level admin rights.
+ *
+ * XOOPS's include/cp_header.php verifies system-admin-group membership, but
+ * a site may grant module-level admin rights to a narrower group (via
+ * system admin → groups → module admin). Without this guard, any user in
+ * the system-admin group can reach xpages admin pages even if they were
+ * only granted admin on a DIFFERENT module.
  */
 function xpages_admin_boot() {
     xpages_load_language('admin');
     xpages_load_language('modinfo');
+    xpages_require_module_admin();
+}
+
+/**
+ * Redirect any request that isn't from a user with admin rights
+ * specifically for the xpages module. Call at the top of every admin
+ * controller (done automatically via xpages_admin_boot()).
+ */
+function xpages_require_module_admin(): void {
+    global $xoopsUser, $xoopsModule;
+
+    // cp_header.php already enforced the system admin-group check; this is
+    // defense-in-depth for the per-module admin ACL.
+    if (!is_object($xoopsUser)
+        || !is_object($xoopsModule)
+        || !$xoopsUser->isAdmin($xoopsModule->getVar('mid'))
+    ) {
+        redirect_header(
+            XOOPS_URL . '/user.php',
+            3,
+            defined('_NOPERM') ? _NOPERM : 'You do not have permission to access this page.'
+        );
+        exit;
+    }
 }
 
 /**

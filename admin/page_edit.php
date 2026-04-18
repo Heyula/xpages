@@ -28,7 +28,13 @@ if (!$pageHandler || !$fieldHandler || !$valueHandler) {
 $pageId = isset($_GET['page_id'])  ? (int)$_GET['page_id']  :
         (isset($_POST['page_id']) ? (int)$_POST['page_id'] : 0);
 $op     = $_POST['op'] ?? 'edit';
-$canUseAdvancedCode = is_object($xoopsUser) && method_exists($xoopsUser, 'getGroups') && in_array(1, $xoopsUser->getGroups(), true);
+// "Advanced code" = raw HTML/JS injected into <head> / before </body>.
+// Gate on module-admin rights rather than hard-coded group id 1: a site
+// may rebind "webmaster" to a different group id, and `getGroups()`
+// returns every group the user belongs to, not a privilege level.
+$canUseAdvancedCode = is_object($xoopsUser)
+    && is_object($xoopsModule)
+    && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 $descendantIds = [];
 if ($pageId) {
     xpages_collect_descendant_ids($pageHandler, $pageId, $descendantIds);
