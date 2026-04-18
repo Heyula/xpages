@@ -141,6 +141,177 @@
 }
 
 /* ==========================================================================
+   Alert boxes (handler errors, delete confirms, informational banners)
+   ========================================================================== */
+.xp-alert {
+    padding: 14px 16px;
+    margin: 18px 0;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 13px;
+}
+.xp-alert--error {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+.xp-alert--warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+    padding: 20px;
+    margin: 16px 0;
+    border-radius: 8px;
+}
+.xp-alert--warning p {
+    font-size: 15px;
+    margin: 0 0 14px;
+}
+.xp-alert--info {
+    margin-top: 14px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 13px;
+}
+
+/* ==========================================================================
+   Admin toolbar (page header with title + primary action)
+   ========================================================================== */
+.xp-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 16px 0 20px;
+}
+.xp-toolbar h2 {
+    margin: 0;
+    font-size: 20px;
+}
+.xp-toolbar--title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.xp-toolbar--title-group small {
+    color: #6b7280;
+    font-size: 16px;
+}
+
+/* ==========================================================================
+   Button variants (used inside forms + confirmation boxes + toolbar)
+   ========================================================================== */
+.xp-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #fff;
+}
+.xp-btn--add     { background: #28a745; }
+.xp-btn--primary { background: #007bff; }
+.xp-btn--danger  { background: #dc3545; padding: 7px 16px; border-radius: 5px; }
+.xp-btn--cancel  { background: #6c757d; padding: 7px 16px; border-radius: 5px; }
+.xp-btn--unstyled {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   Admin data table (pages list, fields list, etc.)
+   ========================================================================== */
+.xp-table-wrap {
+    overflow-x: auto;
+}
+.xp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+.xp-table thead tr {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+.xp-table th,
+.xp-table td {
+    padding: 11px 14px;
+    font-size: 13px;
+}
+.xp-table th       { text-align: left; }
+.xp-cell-center    { text-align: center; }
+.xp-table tbody tr {
+    border-bottom: 1px solid #dee2e6;
+    background: #fff;
+}
+.xp-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+.xp-table .xp-alias-code {
+    background: #f1f3f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+.xp-table .xp-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.xp-table .xp-actions a {
+    text-decoration: none;
+    font-size: 13px;
+}
+.xp-action--edit   { color: #007bff; }
+.xp-action--view   { color: #17a2b8; }
+.xp-action--delete { color: #dc3545; }
+
+/* ==========================================================================
+   Empty-state placeholder (shown when a listing has no rows yet)
+   ========================================================================== */
+.xp-empty {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+}
+.xp-empty-icon {
+    font-size: 46px;
+    margin-bottom: 10px;
+}
+.xp-empty-text {
+    font-size: 17px;
+    color: #6b7280;
+}
+.xp-empty-cta {
+    display: inline-block;
+    margin-top: 16px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   Confirmation dialog action row (used inside .xp-alert--warning)
+   ========================================================================== */
+.xp-confirm-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ==========================================================================
    Advanced-code warning (page_edit.php — header_code/footer_code)
    ========================================================================== */
 .xp-adv-warning {
