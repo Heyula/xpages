@@ -186,7 +186,7 @@ function xpages_normalize_url($url, $allowRelative = true) {
         return '';
     }
 
-    if (strpos($url, '//') === 0) {
+    if (str_starts_with($url, '//')) {
         return '';
     }
 
