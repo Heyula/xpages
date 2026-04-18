@@ -289,6 +289,12 @@
     text-decoration: none;
     font-size: 13px;
 }
+.xp-action--edit,
+.xp-action--view,
+.xp-action--delete {
+    text-decoration: none;
+    font-size: 13px;
+}
 .xp-action--edit   { color: #007bff; }
 .xp-action--view   { color: #17a2b8; }
 .xp-action--delete { color: #dc3545; }
@@ -319,6 +325,11 @@
     padding: 10px 22px;
     border-radius: 8px;
     text-decoration: none;
+}
+/* Solid blue variant — used by fields.php / gallery.php empty-state CTA
+   (the original used #007bff, not the green gradient). */
+.xp-empty-cta--blue {
+    background: #007bff;
 }
 
 /* ==========================================================================
@@ -454,6 +465,55 @@
     margin-top: 8px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   Gallery grid (admin/gallery.php listing)
+   ========================================================================== */
+.xpages-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+.xpages-gallery-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+}
+.xpages-gallery-card-img {
+    height: 200px;
+    overflow: hidden;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.xpages-gallery-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.xpages-gallery-card-img-placeholder {
+    font-size: 48px;
+}
+.xpages-gallery-card-body {
+    padding: 12px;
+}
+.xpages-gallery-card-body h4 {
+    margin: 0 0 5px;
+}
+.xpages-gallery-card-desc {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: #6c757d;
+}
+.xpages-gallery-card-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* ==========================================================================

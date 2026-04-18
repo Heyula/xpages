@@ -350,7 +350,7 @@ if (empty($fields)) {
     echo '<div class="xp-empty">';
     echo '<div class="xp-empty-icon">⚙️</div>';
     echo '<div class="xp-empty-text">' . _AM_XPAGES_NO_FIELDS . '</div>';
-    echo '<a href="fields.php?op=add&page_id=' . $pageId . '" class="xp-empty-cta">+ ' . _AM_XPAGES_ADD_FIELD . '</a>';
+    echo '<a href="fields.php?op=add&page_id=' . $pageId . '" class="xp-empty-cta xp-empty-cta--blue">+ ' . _AM_XPAGES_ADD_FIELD . '</a>';
     echo '</div>';
     xoops_cp_footer();
     exit;
