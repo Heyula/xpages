@@ -184,7 +184,7 @@ if ($op === 'save') {
 // ── Ekle / Düzenle Formu ──────────────────────────────────────────────────────
 if (in_array($op, ['add', 'edit'], true)) {
     $field      = ($op === 'edit' && $fieldId) ? $fieldHandler->get($fieldId) : $fieldHandler->create();
-    $typeLabels = XpagesField::getTypeLabels();
+    $typeLabels = \XoopsModules\Xpages\Field::getTypeLabels();
     $typeLabels['file'] = _AM_XPAGES_FIELD_TYPE_FILE_IMG;
     $selectedType = (string)$field->getVar('field_type', 'n');
 
@@ -269,7 +269,7 @@ if (in_array($op, ['add', 'edit'], true)) {
 // ── Alan Listesi ──────────────────────────────────────────────────────────────
 $fields = $pageId ? $fieldHandler->getFieldsForPage($pageId, false) : $fieldHandler->getGlobalFields(false);
 
-$typeLabels = XpagesField::getTypeLabels();
+$typeLabels = \XoopsModules\Xpages\Field::getTypeLabels();
 $typeLabels['file'] = _AM_XPAGES_FIELD_TYPE_FILE_IMG;
 
 // Flatten XoopsObject list into template-ready row descriptors.

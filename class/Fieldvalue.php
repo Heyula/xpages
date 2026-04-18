@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Field-value value object.
  *
- * The handler lives in fieldvaluehandler.php, which this file loads at
- * the bottom. See class/page.php for the rationale.
+ * Namespaced M10 rewrite. The handler is in FieldvalueHandler.php and
+ * is loaded on demand via the preloads/autoloader.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesFieldvalue extends XoopsObject
+class Fieldvalue extends \XoopsObject
 {
     public function __construct()
     {
@@ -22,5 +23,3 @@ class XpagesFieldvalue extends XoopsObject
         $this->initVar('field_value', XOBJ_DTYPE_TXTAREA, '',   false);
     }
 }
-
-require_once __DIR__ . '/fieldvaluehandler.php';

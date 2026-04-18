@@ -2,31 +2,34 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Page handler.
  *
- * Companion to class/page.php (the value object). The value-object file
- * require_once's this one, so any code path that loads class/page.php
- * ends up with both classes available — including XOOPS's module-helper
- * lookup and our own \XoopsModules\Xpages\Helper::getHandler('page').
+ * Companion to Page.php. The preloads/autoloader loads this file on
+ * demand when Helper::getHandler('page') resolves it via
+ * XoopsModules\Xpages\PageHandler.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesPageHandler extends XoopsPersistableObjectHandler
+class PageHandler extends \XoopsPersistableObjectHandler
 {
     public function __construct(\XoopsDatabase $db)
     {
-        parent::__construct($db, 'xpages_pages', 'XpagesPage', 'page_id', 'title');
+        // Page::class resolves to the FQCN in this namespace
+        // (XoopsModules\Xpages\Page), which is what the parent's
+        // create() / getObjects() need for `new $className()`.
+        parent::__construct($db, 'xpages_pages', Page::class, 'page_id', 'title');
     }
 
     /**
      * Alias ile sayfa bul
      */
-    public function getByAlias(string $alias): ?XpagesPage
+    public function getByAlias(string $alias): ?Page
     {
-        $criteria = new Criteria('alias', $alias);
+        $criteria = new \Criteria('alias', $alias);
         $objects  = $this->getObjects($criteria);
         return !empty($objects) ? $objects[0] : null;
     }
@@ -34,16 +37,16 @@ class XpagesPageHandler extends XoopsPersistableObjectHandler
     /**
      * Menüde gösterilecek sayfaları getir
      *
-     * @return XpagesPage[]
+     * @return Page[]
      */
     public function getMenuPages(int $parentId = 0, bool $onlyActive = true): array
     {
-        $criteria = new CriteriaCompo();
-        $criteria->add(new Criteria('parent_id', $parentId));
-        $criteria->add(new Criteria('show_in_menu', 1));
+        $criteria = new \CriteriaCompo();
+        $criteria->add(new \Criteria('parent_id', $parentId));
+        $criteria->add(new \Criteria('show_in_menu', 1));
 
         if ($onlyActive) {
-            $criteria->add(new Criteria('page_status', 1));
+            $criteria->add(new \Criteria('page_status', 1));
         }
 
         $criteria->setSort('menu_order');
@@ -86,10 +89,10 @@ class XpagesPageHandler extends XoopsPersistableObjectHandler
      */
     private function aliasExists(string $alias, int $excludeId = 0): bool
     {
-        $criteria = new CriteriaCompo();
-        $criteria->add(new Criteria('alias', $alias));
+        $criteria = new \CriteriaCompo();
+        $criteria->add(new \Criteria('alias', $alias));
         if ($excludeId > 0) {
-            $criteria->add(new Criteria('page_id', $excludeId, '!='));
+            $criteria->add(new \Criteria('page_id', $excludeId, '!='));
         }
         return $this->getCount($criteria) > 0;
     }
@@ -102,8 +105,8 @@ class XpagesPageHandler extends XoopsPersistableObjectHandler
      * InnoDB row level — no read-modify-write race that could lose a
      * hit on a high-traffic page.
      *
-     * Side-effect to be aware of: the in-memory XpagesPage object the
-     * caller may be holding is NOT refreshed. `$page->getVar('hits')`
+     * Side-effect to be aware of: the in-memory Page object the caller
+     * may be holding is NOT refreshed. `$page->getVar('hits')`
      * immediately after this call still reflects the pre-increment
      * value. Re-`get()` the page if the fresh count matters.
      *

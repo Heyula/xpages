@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Gallery value object.
  *
- * The handler lives in galleryhandler.php, which this file loads at
- * the bottom. See class/page.php for the rationale.
+ * Namespaced M10 rewrite. The handler is in GalleryHandler.php and is
+ * loaded on demand via the preloads/autoloader.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesGallery extends XoopsObject
+class Gallery extends \XoopsObject
 {
     public function __construct()
     {
@@ -41,5 +42,3 @@ class XpagesGallery extends XoopsObject
         return '';
     }
 }
-
-require_once __DIR__ . '/galleryhandler.php';

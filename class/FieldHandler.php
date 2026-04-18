@@ -2,39 +2,40 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Field handler.
  *
- * Companion to class/field.php. See class/pagehandler.php for the file-
- * layout rationale.
+ * Companion to Field.php. See PageHandler for the parent::__construct
+ * FQCN-via-::class pattern.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesFieldHandler extends XoopsPersistableObjectHandler
+class FieldHandler extends \XoopsPersistableObjectHandler
 {
     public function __construct(\XoopsDatabase $db)
     {
-        parent::__construct($db, 'xpages_fields', 'XpagesField', 'field_id', 'field_name');
+        parent::__construct($db, 'xpages_fields', Field::class, 'field_id', 'field_name');
     }
 
     /**
      * Sayfaya ait alanları getir
      *
-     * @return XpagesField[]
+     * @return Field[]
      */
     public function getFieldsForPage(int $pageId, bool $onlyActive = true): array
     {
-        $scope = new CriteriaCompo();
-        $scope->add(new Criteria('page_id', $pageId));
-        $scope->add(new Criteria('page_id', 0), 'OR'); // Global alanlar için
+        $scope = new \CriteriaCompo();
+        $scope->add(new \Criteria('page_id', $pageId));
+        $scope->add(new \Criteria('page_id', 0), 'OR'); // Global alanlar için
 
-        $criteria = new CriteriaCompo();
+        $criteria = new \CriteriaCompo();
         $criteria->add($scope);
 
         if ($onlyActive) {
-            $criteria->add(new Criteria('field_status', 1));
+            $criteria->add(new \Criteria('field_status', 1));
         }
         $criteria->setSort('field_order');
         $criteria->setOrder('ASC');
@@ -45,7 +46,7 @@ class XpagesFieldHandler extends XoopsPersistableObjectHandler
     /**
      * Global alanları getir
      *
-     * @return XpagesField[]
+     * @return Field[]
      */
     public function getGlobalFields(bool $onlyActive = true): array
     {
@@ -57,10 +58,10 @@ class XpagesFieldHandler extends XoopsPersistableObjectHandler
      */
     public function fieldNameExists(string $fieldName, int $pageId, int $excludeId = 0): bool
     {
-        $criteria = new CriteriaCompo();
-        $criteria->add(new Criteria('field_name', $fieldName));
+        $criteria = new \CriteriaCompo();
+        $criteria->add(new \Criteria('field_name', $fieldName));
         if ($excludeId > 0) {
-            $criteria->add(new Criteria('field_id', $excludeId, '!='));
+            $criteria->add(new \Criteria('field_id', $excludeId, '!='));
         }
         return $this->getCount($criteria) > 0;
     }

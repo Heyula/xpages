@@ -1,10 +1,10 @@
 <{* xPages — Single extra-field input partial.
     Rendered for each custom page field in the "Extra fields" tab.
 
-    Receives a readonly XpagesFieldDescriptor instance as $field (built
-    by xpages_build_field_descriptor()). Smarty dot syntax resolves to
-    public property access; type is exposed as the XpagesFieldType
-    enum's string value. Properties:
+    Receives a readonly \XoopsModules\Xpages\FieldDescriptor instance as
+    $field (built by xpages_build_field_descriptor()). Smarty dot syntax
+    resolves to public property access; type is exposed as the
+    XoopsModules\Xpages\FieldType enum's string value. Properties:
       id, type, name, input_id, label, required (bool), desc, value
       options           (list of {value, label, selected, radio_id})  — select/radio
       placeholder       (select only)

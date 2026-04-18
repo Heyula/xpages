@@ -2,19 +2,23 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Page value object.
  *
- * The handler lives in pagehandler.php, which this file loads at the
- * bottom. XOOPS's module-helper lookup (Xmf\Module\Helper::initHandler)
- * only loads `class/{name}.php`, so the require_once here is what keeps
- * the handler class available after the split.
+ * The handler is in PageHandler.php; the preloads/autoloader pulls it
+ * in on demand, so no require_once at the foot of this file.
+ *
+ * Helper::getHandler('page') instantiates \XoopsModules\Xpages\PageHandler
+ * directly via the overridden resolver; XOOPS core's xoops_getModule
+ * Handler('page', 'xpages') lookup is no longer supported — internal
+ * callers go through the module Helper.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesPage extends XoopsObject
+class Page extends \XoopsObject
 {
     public function __construct()
     {
@@ -52,7 +56,7 @@ class XpagesPage extends XoopsObject
      */
     public function getPageUrl(): string
     {
-        $helper = \XoopsModules\Xpages\Helper::getInstance();
+        $helper = Helper::getInstance();
         $alias  = (string)$this->getVar('alias');
 
         if ($alias !== '') {
@@ -77,5 +81,3 @@ class XpagesPage extends XoopsObject
         };
     }
 }
-
-require_once __DIR__ . '/pagehandler.php';

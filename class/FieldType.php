@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Backed enum of supported extra-field input types.
  *
@@ -12,7 +14,7 @@ declare(strict_types=1);
  *
  * @package  xpages
  */
-enum XpagesFieldType: string
+enum FieldType: string
 {
     case Text     = 'text';
     case Textarea = 'textarea';

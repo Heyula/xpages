@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Field value object.
  *
- * The handler lives in fieldhandler.php, which this file loads at the
- * bottom. See class/page.php for the rationale behind the require_once
- * pattern (XOOPS helper lookup only loads `class/{name}.php`).
+ * Namespaced M10 rewrite. The handler is in FieldHandler.php and is
+ * loaded on demand via the preloads/autoloader.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesField extends XoopsObject
+class Field extends \XoopsObject
 {
     public function __construct()
     {
@@ -52,5 +52,3 @@ class XpagesField extends XoopsObject
         ];
     }
 }
-
-require_once __DIR__ . '/fieldhandler.php';

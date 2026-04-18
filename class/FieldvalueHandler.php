@@ -2,21 +2,19 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Field-value handler.
- *
- * Companion to class/fieldvalue.php. See class/pagehandler.php for the
- * file-layout rationale.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
+class FieldvalueHandler extends \XoopsPersistableObjectHandler
 {
     public function __construct(\XoopsDatabase $db)
     {
-        parent::__construct($db, 'xpages_field_values', 'XpagesFieldvalue', 'value_id', 'field_value');
+        parent::__construct($db, 'xpages_field_values', Fieldvalue::class, 'value_id', 'field_value');
     }
 
     /**
@@ -27,7 +25,7 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
     public function getValuesForPage(int $pageId): array
     {
         $values   = [];
-        $criteria = new Criteria('page_id', $pageId);
+        $criteria = new \Criteria('page_id', $pageId);
         $objects  = $this->getObjects($criteria);
 
         foreach ($objects ?: [] as $obj) {
@@ -64,9 +62,9 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
                 $cleanValue = filter_var($cleanValue, FILTER_VALIDATE_EMAIL) ? $cleanValue : '';
             }
 
-            $criteria = new CriteriaCompo();
-            $criteria->add(new Criteria('page_id', $pageId));
-            $criteria->add(new Criteria('field_id', $fieldId));
+            $criteria = new \CriteriaCompo();
+            $criteria->add(new \Criteria('page_id', $pageId));
+            $criteria->add(new \Criteria('field_id', $fieldId));
 
             $existing   = $this->getObjects($criteria);
             $fieldValue = !empty($existing) ? $existing[0] : $this->create();
@@ -104,7 +102,7 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
      */
     public function deleteValuesForPage(int $pageId): bool
     {
-        $criteria     = new Criteria('page_id', $pageId);
+        $criteria     = new \Criteria('page_id', $pageId);
         $values       = $this->getObjects($criteria) ?: [];
         $fieldHandler = xpages_get_handler('field');
         $uploadDir    = XOOPS_UPLOAD_PATH . '/xpages/';
@@ -128,7 +126,7 @@ class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
      */
     public function deleteValuesForField(int $fieldId): bool
     {
-        $criteria     = new Criteria('field_id', $fieldId);
+        $criteria     = new \Criteria('field_id', $fieldId);
         $values       = $this->getObjects($criteria) ?: [];
         $fieldHandler = xpages_get_handler('field');
         $uploadDir    = XOOPS_UPLOAD_PATH . '/xpages/';

@@ -6,8 +6,9 @@ declare(strict_types=1);
  * xPages — Template + field-descriptor helpers.
  *
  * Split from the old include/functions.php god-file. Responsible for:
- *   - Building XpagesFieldDescriptor value objects for the extra-field
- *     input partial (admin/page_edit.php + xpages_field_input.tpl).
+ *   - Building \XoopsModules\Xpages\FieldDescriptor value objects for
+ *     the extra-field input partial (admin/page_edit.php +
+ *     xpages_field_input.tpl).
  *   - Assigning the xpages_page / xpages_gallery Smarty variables for
  *     the public single-page template (page.php + xpages_page.tpl).
  *
@@ -19,6 +20,9 @@ declare(strict_types=1);
  * @package xpages
  */
 
+use XoopsModules\Xpages\FieldDescriptor;
+use XoopsModules\Xpages\FieldType;
+
 if (!defined('XOOPS_ROOT_PATH')) {
     exit();
 }
@@ -26,27 +30,25 @@ if (!defined('XOOPS_ROOT_PATH')) {
 /**
  * Build a template-ready descriptor for a single extra-field input.
  *
- * Returns a readonly XpagesFieldDescriptor value object. Templates
- * access its public properties via Smarty dot syntax ($field.type,
- * $field.options, ...); the `type` property is exposed as the enum's
- * string value so the template stays delimiter-agnostic.
+ * Returns a readonly \XoopsModules\Xpages\FieldDescriptor value object.
+ * Templates access its public properties via Smarty dot syntax
+ * ($field.type, $field.options, ...); the `type` property is exposed
+ * as the enum's string value so the template stays delimiter-agnostic.
  *
- * Unknown field_type strings fall back to XpagesFieldType::Text.
+ * Unknown field_type strings fall back to FieldType::Text.
  *
  * @param mixed      $field XoopsObject field definition (or null)
  * @param string|int $value current stored value
  */
-function xpages_build_field_descriptor($field, $value = ''): ?XpagesFieldDescriptor
+function xpages_build_field_descriptor($field, $value = ''): ?FieldDescriptor
 {
     if (!$field) {
         return null;
     }
 
-    xpages_require_field_classes();
-
     $fid      = (int)$field->getVar('field_id');
     $rawType  = (string)$field->getVar('field_type');
-    $typeEnum = XpagesFieldType::tryFrom($rawType) ?? XpagesFieldType::Text;
+    $typeEnum = FieldType::tryFrom($rawType) ?? FieldType::Text;
 
     $base = [
         'id'       => $fid,
@@ -62,20 +64,20 @@ function xpages_build_field_descriptor($field, $value = ''): ?XpagesFieldDescrip
     // Exhaustive match — PHP errors if a new FieldType case is added
     // without a branch here, surfacing the gap at runtime.
     $extras = match ($typeEnum) {
-        XpagesFieldType::Checkbox => [
+        FieldType::Checkbox => [
             'checked' => ((int)$value === 1),
         ],
-        XpagesFieldType::Select => array_merge(
+        FieldType::Select => array_merge(
             xpages_build_option_list($field, (string)$value, $fid),
             ['placeholder' => _AM_XPAGES_SELECT_PLACEHOLDER],
         ),
-        XpagesFieldType::Radio => xpages_build_option_list($field, (string)$value, $fid),
-        XpagesFieldType::File  => xpages_build_file_extras($fid, (string)$value),
-        XpagesFieldType::Text, XpagesFieldType::Textarea, XpagesFieldType::Email,
-        XpagesFieldType::Url,  XpagesFieldType::Tel,      XpagesFieldType::Number => [],
+        FieldType::Radio => xpages_build_option_list($field, (string)$value, $fid),
+        FieldType::File  => xpages_build_file_extras($fid, (string)$value),
+        FieldType::Text, FieldType::Textarea, FieldType::Email,
+        FieldType::Url,  FieldType::Tel,      FieldType::Number => [],
     };
 
-    return new XpagesFieldDescriptor(...array_merge($base, $extras));
+    return new FieldDescriptor(...array_merge($base, $extras));
 }
 
 /**
@@ -148,23 +150,6 @@ function xpages_build_file_extras(int $fid, string $value): array
     $extras['is_image']          = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
 
     return $extras;
-}
-
-/**
- * Load the FieldType enum + FieldDescriptor class on demand.
- *
- * The preloads/autoloader registers PSR-4 for XoopsModules\Xpages\* but
- * FieldType / FieldDescriptor are in the global namespace (their source
- * files ship at class/FieldType.php and class/FieldDescriptor.php).
- * This helper require_once's them explicitly for any code path that
- * runs before the normal XOOPS bootstrap.
- */
-function xpages_require_field_classes(): void
-{
-    if (!class_exists('XpagesFieldDescriptor', false)) {
-        require_once XOOPS_ROOT_PATH . '/modules/xpages/class/FieldType.php';
-        require_once XOOPS_ROOT_PATH . '/modules/xpages/class/FieldDescriptor.php';
-    }
 }
 
 /**

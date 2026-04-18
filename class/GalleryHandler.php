@@ -2,32 +2,30 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Gallery handler.
- *
- * Companion to class/gallery.php. See class/pagehandler.php for the
- * file-layout rationale.
  *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
-
-class XpagesGalleryHandler extends XoopsPersistableObjectHandler
+class GalleryHandler extends \XoopsPersistableObjectHandler
 {
     public function __construct(\XoopsDatabase $db)
     {
-        parent::__construct($db, 'xpages_gallery', 'XpagesGallery', 'gallery_id', 'title');
+        parent::__construct($db, 'xpages_gallery', Gallery::class, 'gallery_id', 'title');
     }
 
     /**
-     * @return XpagesGallery[]
+     * @return Gallery[]
      */
     public function getGalleryForPage(int $pageId, bool $onlyActive = true): array
     {
-        $criteria = new CriteriaCompo();
-        $criteria->add(new Criteria('page_id', $pageId));
+        $criteria = new \CriteriaCompo();
+        $criteria->add(new \Criteria('page_id', $pageId));
         if ($onlyActive) {
-            $criteria->add(new Criteria('image_status', 1));
+            $criteria->add(new \Criteria('image_status', 1));
         }
         $criteria->setSort('image_order');
         $criteria->setOrder('ASC');
@@ -37,7 +35,7 @@ class XpagesGalleryHandler extends XoopsPersistableObjectHandler
 
     public function getCountForPage(int $pageId): int
     {
-        $criteria = new Criteria('page_id', $pageId);
+        $criteria = new \Criteria('page_id', $pageId);
         return (int)$this->getCount($criteria);
     }
 

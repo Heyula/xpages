@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace XoopsModules\Xpages;
+
 /**
  * xPages — Read-only descriptor for a single extra-field input.
  *
@@ -16,7 +18,7 @@ declare(strict_types=1);
  *
  * @package  xpages
  */
-readonly class XpagesFieldDescriptor
+readonly class FieldDescriptor
 {
     /**
      * @param array<int,array{value:string,label:string,selected:bool,radio_id:string}> $options
