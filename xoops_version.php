@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages - Static Pages Module for XOOPS 2.7.0
  * @package    xpages

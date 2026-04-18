@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — Admin ilave alanlar yönetimi (Dosya/Resim desteği eklendi)
  * @package  xpages
