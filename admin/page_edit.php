@@ -80,8 +80,34 @@ if ($op === 'save') {
     $page->setVar('redirect_url', xpages_normalize_url($_POST['redirect_url'] ?? ''));
 
     if ($canUseAdvancedCode) {
-        $page->setVar('header_code',  $_POST['header_code']  ?? '');
-        $page->setVar('footer_code',  $_POST['footer_code']  ?? '');
+        $newHeader = (string)($_POST['header_code'] ?? '');
+        $newFooter = (string)($_POST['footer_code'] ?? '');
+        $oldHeader = (string)$page->getVar('header_code', 'n');
+        $oldFooter = (string)$page->getVar('footer_code', 'n');
+
+        // Audit trail — these fields render via {nofilter} on the public
+        // page, so every modification is security-relevant even when the
+        // actor is a legitimate webmaster. Logged via XoopsLogger so the
+        // entry appears in XOOPS's extra-info log for post-incident review.
+        if (($newHeader !== $oldHeader || $newFooter !== $oldFooter)
+            && is_object($GLOBALS['xoopsLogger'])
+        ) {
+            $GLOBALS['xoopsLogger']->addExtra(
+                'xpages',
+                sprintf(
+                    'header/footer_code modified on page_id=%d by uid=%d (header %d→%d bytes, footer %d→%d bytes)',
+                    (int)($pageId ?: 0),
+                    (int)$GLOBALS['xoopsUser']->getVar('uid'),
+                    strlen($oldHeader),
+                    strlen($newHeader),
+                    strlen($oldFooter),
+                    strlen($newFooter)
+                )
+            );
+        }
+
+        $page->setVar('header_code',  $newHeader);
+        $page->setVar('footer_code',  $newFooter);
     } elseif ($pageId) {
         $page->setVar('header_code',  $page->getVar('header_code', 'n'));
         $page->setVar('footer_code',  $page->getVar('footer_code', 'n'));
@@ -297,6 +323,9 @@ $blockedParentIds = array_flip($descendantIds);
     <!-- TAB: Gelişmiş -->
     <div id="tab-adv" class="xp-tab-pane">
         <?php if ($canUseAdvancedCode): ?>
+            <div role="alert" class="xp-adv-warning" style="background:#fff3cd;border:1px solid #ffc107;border-left:4px solid #dc3545;padding:12px 14px;margin-bottom:16px;border-radius:6px;font-size:13px;color:#3b2b00">
+                <strong>⚠ </strong><?= _AM_XPAGES_ADVANCED_CODE_WARNING ?>
+            </div>
             <div class="xpages-field">
                 <label><?= _AM_XPAGES_HEADER_CODE ?></label>
                 <textarea name="header_code" rows="5" style="font-family:monospace"><?= htmlspecialchars((string)$page->getVar('header_code', 'n'), ENT_QUOTES) ?></textarea>

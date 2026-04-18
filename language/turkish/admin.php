@@ -48,6 +48,7 @@ define('_AM_XPAGES_FOOTER_CODE',       'Sayfa Sonu Kod (</body>)');
 define('_AM_XPAGES_FOOTER_CODE_HELP',  'Yalnızca bu sayfanın </body> etiketine eklenecek kod (JS vb.)');
 define('_AM_XPAGES_MANAGE_FIELDS_FOR_PAGE', 'Bu Sayfaya Özel Alan Yönetimi');
 define('_AM_XPAGES_ADVANCED_CODE_RESTRICTED', 'Sayfa başı/sonu kodunu yalnızca web yöneticileri düzenleyebilir.');
+define('_AM_XPAGES_ADVANCED_CODE_WARNING',    'Uyarı: Aşağıdaki içerik her ziyaretçinin sayfasına OLDUĞU GİBİ eklenir — &lt;script&gt; ve &lt;iframe&gt; dahil. Buraya yapıştırılan herhangi bir XSS kodu sayfanın her görüntülenmesinde çalışır. Yalnızca kendi yazdığınız veya tamamen güvendiğiniz kodları yapıştırın.');
 
 // İlave alan formu
 define('_AM_XPAGES_ADD_FIELD',             'Alan Ekle');
