@@ -120,9 +120,28 @@
     background: #3461b0;
 }
 
-/* Monospace textarea for raw-code fields (header_code / footer_code) */
+/* Monospace textarea for raw-code fields (header_code / footer_code,
+   plus the fallback editor inside xpages_render_editor()). */
 .xp-code-textarea {
     font-family: monospace;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Medium field preview (150×150 — used by file field in the extra-
+   field renderer, bigger than the admin-form .xpf-preview). */
+.xpf-preview--md {
+    max-width: 150px;
+    max-height: 150px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+/* "Replace-current-file" note rendered below a file field */
+.xpf-block-note {
+    display: block;
+    margin-top: 5px;
 }
 
 /* File field wrapper */

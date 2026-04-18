@@ -67,6 +67,21 @@ function xpages_admin_register_css(): void {
 }
 
 /**
+ * Register the module's public-facing stylesheet.
+ *
+ * Must be called AFTER XOOPS_ROOT_PATH/header.php has been included (the
+ * main public header is what populates $xoTheme on the front-end). Used
+ * by page.php and index.php so the public layout can use class names
+ * instead of inline style attributes in the .tpl templates.
+ */
+function xpages_register_public_css(): void {
+    if (!isset($GLOBALS['xoTheme']) || !is_object($GLOBALS['xoTheme'])) {
+        return;
+    }
+    $GLOBALS['xoTheme']->addStylesheet(XOOPS_URL . '/modules/xpages/assets/css/style.css');
+}
+
+/**
  * Redirect any request that isn't from a user with admin rights
  * specifically for the xpages module. Call at the top of every admin
  * controller (done automatically via xpages_admin_boot()).
@@ -327,7 +342,9 @@ function xpages_render_field_input($field, $value = '') {
                     if ($opt === '') continue;
                     $checked = ($opt == $value) ? ' checked' : '';
                     $radioId = 'extra_field_' . $fid . '_' . $i;
-                    $html .= '<label for="' . $radioId . '" style="display:inline-block;margin-right:15px;font-weight:normal">';
+                    // .xpages-radio-group label (from admin.css) supplies the
+                    // inline-block / margin / normal-weight declarations.
+                    $html .= '<label for="' . $radioId . '">';
                     $html .= '<input type="radio" name="' . $name . '" id="' . $radioId . '" value="' . htmlspecialchars($opt, ENT_QUOTES) . '"' . $checked . $required . '> ' . htmlspecialchars($opt, ENT_QUOTES);
                     $html .= '</label>';
                     $i++;
@@ -345,18 +362,18 @@ function xpages_render_field_input($field, $value = '') {
                 $safeValue = xpages_safe_filename((string)$value);
                 $fileUrl = $safeValue !== '' ? $uploadUrl . rawurlencode($safeValue) : '';
                 $ext = strtolower(pathinfo($safeValue, PATHINFO_EXTENSION));
-                $html .= '<div class="xpages-current-file" style="margin-top:8px">';
+                $html .= '<div class="xpages-current-file xp-margin-top-8">';
                 $html .= '<small><strong>' . _AM_XPAGES_FILE_CURRENT_LABEL . '</strong><br>';
                 if ($fileUrl && in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
-                    $html .= '<img src="' . $fileUrl . '" style="max-width:150px;max-height:150px;margin-top:5px;border-radius:4px;border:1px solid #dee2e6">';
+                    $html .= '<img src="' . $fileUrl . '" class="xpf-preview--md" alt="">';
                 } elseif ($fileUrl) {
-                    $html .= '<a href="' . $fileUrl . '" target="_blank">📎 ' . htmlspecialchars($value) . '</a>';
+                    $html .= '<a href="' . $fileUrl . '" target="_blank" rel="noopener">📎 ' . htmlspecialchars($value) . '</a>';
                 }
-                $html .= '<br><span style="color:#6c757d;font-size:11px">' . _AM_XPAGES_FILE_REPLACE_NOTE . '</span>';
+                $html .= '<br><span class="xp-text-muted xp-text-small">' . _AM_XPAGES_FILE_REPLACE_NOTE . '</span>';
                 $html .= '</small></div>';
                 $html .= '<input type="hidden" name="' . $name . '" value="' . htmlspecialchars($safeValue, ENT_QUOTES) . '">';
             } else {
-                $html .= '<small class="xpf-desc" style="display:block;margin-top:5px">' . _AM_XPAGES_FILE_NONE . '</small>';
+                $html .= '<small class="xpf-desc xpf-block-note">' . _AM_XPAGES_FILE_NONE . '</small>';
             }
             $html .= '</div>';
             break;
@@ -595,7 +612,7 @@ function xpages_render_editor($name, $value, $rows = 25, $cols = '100%') {
     
     // Hiçbir editör yoksa textarea döndür
     if (empty($editorHtml)) {
-        $editorHtml = '<textarea name="' . htmlspecialchars($name, ENT_QUOTES) . '" id="' . htmlspecialchars($name, ENT_QUOTES) . '" rows="' . (int)$rows . '" style="width:100%;font-family:monospace">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
+        $editorHtml = '<textarea name="' . htmlspecialchars($name, ENT_QUOTES) . '" id="' . htmlspecialchars($name, ENT_QUOTES) . '" rows="' . (int)$rows . '" class="xp-code-textarea">' . htmlspecialchars($value, ENT_QUOTES) . '</textarea>';
     }
     
     return $editorHtml;
