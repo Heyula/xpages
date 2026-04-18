@@ -53,6 +53,7 @@ function xpages_admin_register_css(): void {
         return;
     }
     $GLOBALS['xoTheme']->addStylesheet(XOOPS_URL . '/modules/xpages/assets/css/admin.css');
+    $GLOBALS['xoTheme']->addScript(XOOPS_URL . '/modules/xpages/assets/js/admin.js');
 }
 
 /**
