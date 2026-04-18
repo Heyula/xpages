@@ -322,92 +322,142 @@ function xpages_collect_descendant_ids($pageHandler, $pageId, array &$descendant
 /**
  * Build a template-ready descriptor for a single extra-field input.
  *
- * The returned array is consumed by templates/admin/xpages_field_input.tpl.
- * Options for select/radio are pre-split and per-option flags computed in
- * PHP so the template can stay a simple if-chain with no filtering logic.
+ * Returns a readonly XpagesFieldDescriptor value object. Templates
+ * access its public properties via Smarty dot syntax ($field.type,
+ * $field.options, ...); the `type` property is exposed as the enum's
+ * string value so the template stays delimiter-agnostic.
  *
- * @param mixed        $field  XoopsObject field definition (or null)
- * @param string|int   $value  current stored value
- * @return array|null          descriptor array, or null when $field is invalid
+ * Unknown field_type strings fall back to XpagesFieldType::Text.
+ *
+ * @param mixed      $field XoopsObject field definition (or null)
+ * @param string|int $value current stored value
  */
-function xpages_build_field_descriptor($field, $value = '')
+function xpages_build_field_descriptor($field, $value = ''): ?XpagesFieldDescriptor
 {
     if (!$field) {
         return null;
     }
 
-    $fid  = (int)   $field->getVar('field_id');
-    $type = (string)$field->getVar('field_type');
-    $name = 'extra_fields[' . $fid . ']';
+    xpages_require_field_classes();
 
-    $descriptor = [
+    $fid      = (int)$field->getVar('field_id');
+    $rawType  = (string)$field->getVar('field_type');
+    $typeEnum = XpagesFieldType::tryFrom($rawType) ?? XpagesFieldType::Text;
+
+    $base = [
         'id'       => $fid,
-        'type'     => $type,
-        'name'     => $name,
+        'type'     => $typeEnum->value,
+        'name'     => 'extra_fields[' . $fid . ']',
         'input_id' => 'extra_field_' . $fid,
         'label'    => (string)$field->getVar('field_label'),
         'desc'     => (string)$field->getVar('field_desc'),
-        'required' => (bool)  $field->getVar('field_required'),
+        'required' => (bool)$field->getVar('field_required'),
         'value'    => (string)$value,
     ];
 
-    if ($type === 'checkbox') {
-        $descriptor['checked'] = ((int)$value === 1);
-        return $descriptor;
+    // Exhaustive match — PHP errors if a new FieldType case is added
+    // without a branch here, surfacing the gap at runtime.
+    $extras = match ($typeEnum) {
+        XpagesFieldType::Checkbox => [
+            'checked' => ((int)$value === 1),
+        ],
+        XpagesFieldType::Select => array_merge(
+            xpages_build_option_list($field, (string)$value, $fid),
+            ['placeholder' => _AM_XPAGES_SELECT_PLACEHOLDER],
+        ),
+        XpagesFieldType::Radio => xpages_build_option_list($field, (string)$value, $fid),
+        XpagesFieldType::File  => xpages_build_file_extras($fid, (string)$value),
+        XpagesFieldType::Text, XpagesFieldType::Textarea, XpagesFieldType::Email,
+        XpagesFieldType::Url,  XpagesFieldType::Tel,      XpagesFieldType::Number => [],
+    };
+
+    return new XpagesFieldDescriptor(...array_merge($base, $extras));
+}
+
+/**
+ * Parse the stored field_options string into a list of descriptor rows.
+ *
+ * @return array{options: array<int,array{value:string,label:string,selected:bool,radio_id:string}>}
+ */
+function xpages_build_option_list($field, string $value, int $fid): array
+{
+    $raw = (string)$field->getVar('field_options');
+    $raw = html_entity_decode($raw, ENT_QUOTES, 'UTF-8');
+    $raw = preg_replace('/<br\s*\/?>/i', "\n", $raw);
+    $raw = str_replace(["\r\n", "\r"], "\n", $raw);
+
+    $options = [];
+    $i = 0;
+    foreach (explode("\n", trim($raw)) as $opt) {
+        $opt = trim($opt);
+        if ($opt === '') {
+            continue;
+        }
+        $options[] = [
+            'value'    => $opt,
+            'label'    => $opt,
+            'selected' => ($opt === $value),
+            'radio_id' => 'extra_field_' . $fid . '_' . $i,
+        ];
+        $i++;
     }
 
-    if ($type === 'select' || $type === 'radio') {
-        $raw = (string)$field->getVar('field_options');
-        $raw = html_entity_decode($raw, ENT_QUOTES, 'UTF-8');
-        $raw = preg_replace('/<br\s*\/?>/i', "\n", $raw);
-        $raw = str_replace(["\r\n", "\r"], "\n", $raw);
+    return ['options' => $options];
+}
 
-        $options = [];
-        $i = 0;
-        foreach (explode("\n", trim($raw)) as $opt) {
-            $opt = trim($opt);
-            if ($opt === '') {
-                continue;
-            }
-            $options[] = [
-                'value'    => $opt,
-                'label'    => $opt,
-                'selected' => ($opt == $value),
-                'radio_id' => 'extra_field_' . $fid . '_' . $i,
-            ];
-            $i++;
-        }
-        $descriptor['options'] = $options;
-        if ($type === 'select') {
-            $descriptor['placeholder'] = _AM_XPAGES_SELECT_PLACEHOLDER;
-        }
-        return $descriptor;
-    }
-
-    if ($type === 'file') {
-        $descriptor['file_input_name'] = 'extra_files[' . $fid . ']';
-        $descriptor['file_input_id']   = 'extra_file_'  . $fid;
-        $descriptor['labels'] = [
+/**
+ * Build the file-type specific descriptor extras.
+ *
+ * Only populates current_file_* when $value points at a safe filename
+ * that survives xpages_safe_filename() — empty strings or traversal
+ * attempts fall back to the "no file" template branch.
+ *
+ * @return array<string,mixed>
+ */
+function xpages_build_file_extras(int $fid, string $value): array
+{
+    $extras = [
+        'file_input_name'  => 'extra_files[' . $fid . ']',
+        'file_input_id'    => 'extra_file_'  . $fid,
+        'labels'           => [
             'current_file' => _AM_XPAGES_FILE_CURRENT_LABEL,
             'replace_note' => _AM_XPAGES_FILE_REPLACE_NOTE,
             'file_none'    => _AM_XPAGES_FILE_NONE,
-        ];
-        $descriptor['has_current_file'] = false;
+        ],
+        'has_current_file' => false,
+    ];
 
-        if (!empty($value)) {
-            $safeValue = xpages_safe_filename((string)$value);
-            if ($safeValue !== '') {
-                $ext = strtolower(pathinfo($safeValue, PATHINFO_EXTENSION));
-                $descriptor['has_current_file']  = true;
-                $descriptor['current_file_url']  = XOOPS_UPLOAD_URL . '/xpages/' . rawurlencode($safeValue);
-                $descriptor['current_file_raw']  = (string)$value;
-                $descriptor['current_file_safe'] = $safeValue;
-                $descriptor['is_image']          = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
-            }
-        }
+    if ($value === '') {
+        return $extras;
     }
 
-    return $descriptor;
+    $safeValue = xpages_safe_filename($value);
+    if ($safeValue === '') {
+        return $extras;
+    }
+
+    $ext = strtolower(pathinfo($safeValue, PATHINFO_EXTENSION));
+    $extras['has_current_file']  = true;
+    $extras['current_file_url']  = XOOPS_UPLOAD_URL . '/xpages/' . rawurlencode($safeValue);
+    $extras['current_file_raw']  = $value;
+    $extras['current_file_safe'] = $safeValue;
+    $extras['is_image']          = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+
+    return $extras;
+}
+
+/**
+ * Load the FieldType enum + FieldDescriptor class on demand.
+ *
+ * PSR-4 autoloading arrives with 7f (preloads/autoloader.php); until
+ * then the descriptor builder require_once's them explicitly.
+ */
+function xpages_require_field_classes(): void
+{
+    if (!class_exists('XpagesFieldDescriptor', false)) {
+        require_once XOOPS_ROOT_PATH . '/modules/xpages/class/FieldType.php';
+        require_once XOOPS_ROOT_PATH . '/modules/xpages/class/FieldDescriptor.php';
+    }
 }
 
 /**
