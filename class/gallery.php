@@ -2,7 +2,7 @@
 /**
  * xPages — Gallery Class
  * @package  xpages
- * @author   Eren Yumak — Aymak (aymak.net)
+ * @author   Eren Yumak — Aymak (erenyumak.com)
  */
 
 class XpagesGallery extends XoopsObject
