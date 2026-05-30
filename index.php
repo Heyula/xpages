@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — Ön yüz - Sayfa listesi
  * @package  xpages
@@ -37,7 +40,7 @@ $criteria->add(new Criteria('show_in_nav',  1));
 $criteria->setSort('menu_order');
 $criteria->setOrder('ASC');
 
-$itemsPerPage = isset($xoopsModuleConfig["items_per_page"]) ? (int)$xoopsModuleConfig['items_per_page'] : 10;
+$itemsPerPage = (int)($xoopsModuleConfig['items_per_page'] ?? 10);
 $totalCount   = $pageHandler->getCount($criteria);
 
 // Sayfalama
