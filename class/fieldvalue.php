@@ -1,6 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 /**
- * xPages — Field Value Class
+ * xPages — Field-value value object.
+ *
+ * The handler lives in fieldvaluehandler.php, which this file loads at
+ * the bottom. See class/page.php for the rationale.
+ *
  * @package  xpages
  * @author   Eren Yumak — Aymak (aymak.net)
  */
@@ -16,137 +23,4 @@ class XpagesFieldvalue extends XoopsObject
     }
 }
 
-class XpagesFieldvalueHandler extends XoopsPersistableObjectHandler
-{
-    public function __construct($db)
-    {
-        parent::__construct($db, 'xpages_field_values', 'XpagesFieldvalue', 'value_id', 'field_value');
-    }
-    
-    /**
-     * Toplam kayıt sayısını döndür
-     */
-    public function getCount($criteria = null) {
-        return parent::getCount($criteria);
-    }
-    
-    /**
-     * Sayfaya ait tüm alan değerlerini getir
-     */
-    public function getValuesForPage($pageId) {
-        $values = [];
-        $criteria = new Criteria('page_id', $pageId);
-        $objects = $this->getObjects($criteria);
-        
-        foreach ($objects as $obj) {
-            $values[(int)$obj->getVar('field_id')] = $obj->getVar('field_value');
-        }
-        
-        return $values;
-    }
-    
-
-/**
- * Sayfa için alan değerlerini kaydet (TAMAMEN YENİLENDİ)
- */
-    public function saveValuesForPage($pageId, $values) {
-        if (!$pageId || !is_array($values)) return false;
-
-        $fieldHandler = xpages_get_handler('field');
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
-
-        foreach ($values as $fieldId => $value) {
-            $fieldId = (int)$fieldId;
-            $field = $fieldHandler ? $fieldHandler->get($fieldId) : null;
-            $fieldType = $field ? (string)$field->getVar('field_type', 'n') : '';
-            $cleanValue = (string)$value;
-
-            if ($fieldType === 'file') {
-                $cleanValue = xpages_safe_filename($cleanValue);
-            } elseif ($fieldType === 'url') {
-                $cleanValue = xpages_normalize_url($cleanValue);
-            } elseif ($fieldType === 'email') {
-                $cleanValue = trim($cleanValue);
-                $cleanValue = filter_var($cleanValue, FILTER_VALIDATE_EMAIL) ? $cleanValue : '';
-            }
-
-            $criteria = new CriteriaCompo();
-            $criteria->add(new Criteria('page_id', $pageId));
-            $criteria->add(new Criteria('field_id', $fieldId));
-
-            $existing = $this->getObjects($criteria);
-            $fieldValue = !empty($existing) ? $existing[0] : $this->create();
-            $oldValue = !empty($existing) ? (string)$fieldValue->getVar('field_value', 'n') : '';
-
-            if ($cleanValue !== '' || $cleanValue === '0') {
-                if ($fieldType === 'file' && $oldValue !== '' && $oldValue !== $cleanValue) {
-                    $oldFile = xpages_safe_filename($oldValue);
-                    if ($oldFile !== '' && file_exists($uploadDir . $oldFile)) {
-                        @unlink($uploadDir . $oldFile);
-                    }
-                }
-
-                $fieldValue->setVar('page_id', $pageId);
-                $fieldValue->setVar('field_id', $fieldId);
-                $fieldValue->setVar('field_value', $cleanValue);
-                $this->insert($fieldValue);
-            } else {
-                if ($fieldType === 'file' && $oldValue !== '') {
-                    $oldFile = xpages_safe_filename($oldValue);
-                    if ($oldFile !== '' && file_exists($uploadDir . $oldFile)) {
-                        @unlink($uploadDir . $oldFile);
-                    }
-                }
-
-                $this->deleteAll($criteria);
-            }
-        }
-
-        return true;
-    }
-    
-    /**
-     * Sayfaya ait tüm alan değerlerini sil
-     */
-    public function deleteValuesForPage($pageId) {
-        $criteria = new Criteria('page_id', $pageId);
-        $values = $this->getObjects($criteria) ?: [];
-        $fieldHandler = xpages_get_handler('field');
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
-
-        foreach ($values as $value) {
-            $fieldId = (int)$value->getVar('field_id');
-            $field = $fieldHandler ? $fieldHandler->get($fieldId) : null;
-            if ($field && $field->getVar('field_type') === 'file' && !empty($value->getVar('field_value'))) {
-                $oldFile = xpages_safe_filename($value->getVar('field_value', 'n'));
-                if ($oldFile !== '' && file_exists($uploadDir . $oldFile)) {
-                    @unlink($uploadDir . $oldFile);
-                }
-            }
-        }
-
-        return $this->deleteAll($criteria);
-    }
-
-    /**
-     * Belirli bir alanın tüm değerlerini sil
-     */
-    public function deleteValuesForField($fieldId) {
-        $criteria = new Criteria('field_id', (int)$fieldId);
-        $values = $this->getObjects($criteria) ?: [];
-        $fieldHandler = xpages_get_handler('field');
-        $uploadDir = XOOPS_UPLOAD_PATH . '/xpages/';
-        $field = $fieldHandler ? $fieldHandler->get((int)$fieldId) : null;
-
-        foreach ($values as $value) {
-            if ($field && $field->getVar('field_type') === 'file' && !empty($value->getVar('field_value'))) {
-                $oldFile = xpages_safe_filename($value->getVar('field_value', 'n'));
-                if ($oldFile !== '' && file_exists($uploadDir . $oldFile)) {
-                    @unlink($uploadDir . $oldFile);
-                }
-            }
-        }
-
-        return $this->deleteAll($criteria);
-    }
-}
+require_once __DIR__ . '/fieldvaluehandler.php';

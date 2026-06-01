@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * xPages — Admin hakkında sayfası
  * @package  xpages
